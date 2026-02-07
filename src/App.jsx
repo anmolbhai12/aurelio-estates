@@ -75,9 +75,9 @@ function App() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isNewUser, setIsNewUser] = useState(true);
 
-  // GAS URLs - These should be replaced by the user
-  const WHATSAPP_PROXY_URL = 'YOUR_WHATSAPP_PROXY_URL';
-  const SIGNUP_LOG_URL = 'YOUR_SPREADSHEET_SIGNUP_URL';
+  // GAS URLs
+  const WHATSAPP_PROXY_URL = 'https://script.google.com/macros/s/AKfycbys849f2bF3fT3ssYMxDhAuACCcWJJ5mB-CVEL2thA8MT8aHYw-xrQSWDK37m3tFJ4pwQ/exec';
+  const SIGNUP_LOG_URL = 'https://script.google.com/macros/s/AKfycbys849f2bF3fT3ssYMxDhAuACCcWJJ5mB-CVEL2thA8MT8aHYw-xrQSWDK37m3tFJ4pwQ/exec';
 
   // Animation Effects
   useEffect(() => {
@@ -129,7 +129,7 @@ function App() {
     // Send via WhatsApp Proxy
     powerSync(WHATSAPP_PROXY_URL, {
       phone: phoneNumber,
-      message: `Your Aurelio Estates verification code is: ${generatedOtp}. Welcome to the legend.`
+      message: `Your DalaalStreet verification code is: ${generatedOtp}. Welcome to the legend.`
     });
 
     setIsOtpSent(true);
@@ -156,7 +156,6 @@ function App() {
 
   // Handle New Property
   const handlePostProperty = (e) => {
-    e.preventDefault();
     if (!user) {
       setView('auth');
       return;
@@ -186,7 +185,7 @@ function App() {
           <div style={{ width: '40px', height: '40px', background: 'var(--accent-gold)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <HomeIcon size={24} color="var(--bg-primary)" />
           </div>
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>Aurelio</h2>
+          <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>DalaalStreet</h2>
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           <button onClick={() => setView('buyer')} style={{ color: view === 'buyer' ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>Explore</button>
@@ -213,7 +212,7 @@ function App() {
           Discover Your <span style={{ color: 'var(--accent-gold)' }}>Masterpiece</span> Home
         </h1>
         <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '2.5rem' }}>
-          Connecting sophisticated buyers with extraordinary properties. Aurelio Estates delivers a seamless, premium marketplace experience for the modern legend.
+          Connecting sophisticated buyers with extraordinary properties. DalaalStreet delivers a seamless, premium marketplace experience for the modern legend.
         </p>
         <div className="glass" style={{ padding: '8px', borderRadius: '50px', display: 'flex', maxWidth: '600px', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 20px', flex: 1 }}>
@@ -253,7 +252,14 @@ function App() {
             key={prop.id}
             className="glass animate-fade"
             style={{ borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.3s ease' }}
-            onClick={() => { setSelectedProperty(prop); setView('detail'); }}
+            onClick={() => {
+              if (user) {
+                setSelectedProperty(prop);
+                setView('detail');
+              } else {
+                setView('auth');
+              }
+            }}
             onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-10px)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
           >
@@ -414,7 +420,7 @@ function App() {
             </button>
 
             <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '20px' }}>
-              Verified by Aurelio Estates. Terms and conditions apply.
+              Verified by DalaalStreet. Terms and conditions apply.
             </p>
           </div>
         </div>
@@ -518,7 +524,7 @@ function App() {
 
       <footer style={{ background: 'var(--bg-secondary)', padding: '60px 0', marginTop: '60px', borderTop: '1px solid var(--glass-border)' }}>
         <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>Aurelio Estates</h2>
+          <h2 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>DalaalStreet</h2>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 30px' }}>
             The world's most unique premium real estate marketplace. Built for legends.
           </p>
@@ -527,7 +533,7 @@ function App() {
             <a href="#">Privacy</a>
             <a href="#">Contact</a>
           </div>
-          <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>© 2026 Aurelio Estates. All rights reserved.</p>
+          <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>© 2026 DalaalStreet. All rights reserved.</p>
         </div>
       </footer>
     </div>

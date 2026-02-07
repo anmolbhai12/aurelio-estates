@@ -8,7 +8,7 @@
  * 5. Deploy as Web App (Me, Anyone).
  */
 
-const BAILEYS_SERVER_URL = 'https://bakenovation-bot.alwaysdata.net'; 
+const BAILEYS_SERVER_URL = 'https://aurelio-bot.alwaysdata.net'; 
 const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE';
 
 function doGet(e) { return handleRequest(e); }
