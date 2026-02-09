@@ -350,7 +350,7 @@ _Verified Professional Lead_ 🟢`;
           <div style={{ width: '40px', height: '40px', background: 'var(--accent-gold)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <HomeIcon size={24} color="var(--bg-primary)" />
           </div>
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>DalaalStreet</h2>
+          <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>DalaalStreet v4.2</h2>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -486,7 +486,22 @@ _Verified Professional Lead_ 🟢`;
                 <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
                   {t.hero.subtitle}
                 </p>
-                <button onClick={() => setView('buyer')} className="premium-button">{t.hero.findHomes}</button>
+                <div onClick={() => setIsSearchExpanded(true)} className="glass" style={{
+                  padding: '10px',
+                  borderRadius: '100px',
+                  display: 'flex',
+                  maxWidth: '700px',
+                  cursor: 'text',
+                  marginTop: '1.5rem',
+                  border: '1px solid var(--accent-gold)',
+                  boxShadow: '0 0 20px rgba(197, 160, 89, 0.1)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 25px', flex: 1 }}>
+                    <Search size={22} color="var(--accent-gold)" />
+                    <span style={{ color: 'var(--text-secondary)' }}>{t.hero.searchPlaceholder}</span>
+                  </div>
+                  <button className="premium-button">{t.hero.findHomes}</button>
+                </div>
               </div>
             )}
           </div>
@@ -1022,7 +1037,7 @@ _Verified Professional Lead_ 🟢`;
             <a href="#">{t.footer.contact}</a>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.0 (Global Edition)</span>
+            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.2 (Search Fixed Edition)</span>
           </p>
         </div>
       </footer>
