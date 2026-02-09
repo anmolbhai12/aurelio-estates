@@ -214,4 +214,24 @@ textarea:focus {
   h1 {
     font-size: 2.5rem !important;
   }
+
+  /* Nav responsiveness */
+  nav .container {
+    gap: 10px;
+  }
+
+  nav h2 {
+    display: none;
+  }
+
+  nav a,
+  nav button {
+    gap: 5px !important;
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .premium-button {
+    padding: 10px 20px !important;
+  }
 }

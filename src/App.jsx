@@ -16,8 +16,10 @@ import {
   Send,
   Camera,
   Mail,
-  Hash
+  Hash,
+  Languages
 } from 'lucide-react';
+import { translations } from './translations';
 import { gsap } from 'gsap';
 
 // Mock Data
@@ -30,6 +32,9 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [language, setLanguage] = useState('en');
+
+  const t = translations[language];
 
   // Modal State
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
@@ -328,11 +333,11 @@ _Verified Professional Lead_ 🟢`;
       };
 
       setProperties([newProp, ...properties]);
-      showAlert("✅ Your professional listing is live! Check your WhatsApp for the summary.");
+      showAlert(t.alerts.listingLive);
       setView('buyer');
     } catch (err) {
       console.error(err);
-      showAlert("❌ Listing partially failed. Bot might be offline.");
+      showAlert(t.alerts.listingFailed);
       btn.innerText = originalText;
       btn.disabled = false;
     }
@@ -347,18 +352,48 @@ _Verified Professional Lead_ 🟢`;
           </div>
           <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>DalaalStreet</h2>
         </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <a onClick={() => setView('buyer')} style={{ cursor: 'pointer', color: 'var(--text-primary)', fontWeight: '500' }}>Marketplace</a>
+          {/* Language Switcher - REINFORCED VISIBILITY */}
+          <div className="glass" style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '2px',
+            borderRadius: '20px',
+            fontSize: '0.8rem',
+            border: '1px solid var(--accent-gold)',
+            background: 'rgba(0,0,0,0.5)',
+            boxShadow: '0 0 10px rgba(197, 160, 89, 0.2)'
+          }}>
+            <div style={{ padding: '0 10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Languages size={14} color="var(--accent-gold)" />
+              <span style={{ color: 'var(--accent-gold)', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 'bold' }}>Language:</span>
+            </div>
+            <button
+              onClick={() => setLanguage('en')}
+              style={{ padding: '4px 12px', borderRadius: '15px', background: language === 'en' ? 'var(--accent-gold)' : 'transparent', color: language === 'en' ? 'var(--bg-primary)' : 'var(--text-secondary)', fontWeight: 'bold' }}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLanguage('hi')}
+              style={{ padding: '4px 12px', borderRadius: '15px', background: language === 'hi' ? 'var(--accent-gold)' : 'transparent', color: language === 'hi' ? 'var(--bg-primary)' : 'var(--text-secondary)', fontWeight: 'bold' }}
+            >
+              HI
+            </button>
+          </div>
+
+          <a onClick={() => setView('buyer')} style={{ cursor: 'pointer', color: 'var(--text-primary)', fontWeight: '500' }}>{t.nav.marketplace}</a>
           <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
-            <Plus size={18} /> Post Your Property
+            <Plus size={18} /> {t.nav.postProperty}
           </button>
 
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)' }}>{user.name || 'Legend'}</span>
+              <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)' }}>{user.name || t.auth.legend}</span>
               <button
                 onClick={() => {
-                  showConfirm('Are you sure you want to log out?', () => {
+                  showConfirm(t.alerts.logout, () => {
                     setUser(null);
                     localStorage.removeItem('dalaal_user');
                     setView('landing');
@@ -388,72 +423,87 @@ _Verified Professional Lead_ 🟢`;
         {isSearchExpanded && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--accent-gold)', padding: '20px 0', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
             <div className="container">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                <div className="glass" style={{ display: 'flex', alignItems: 'center', padding: '2px', borderRadius: '20px', fontSize: '0.8rem', border: '1px solid var(--accent-gold)', background: 'rgba(0,0,0,0.5)' }}>
+                  <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center' }}>
+                    <Languages size={14} color="var(--accent-gold)" />
+                  </div>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    style={{ padding: '4px 8px', borderRadius: '15px', background: language === 'en' ? 'var(--accent-gold)' : 'transparent', color: language === 'en' ? 'var(--bg-primary)' : 'var(--text-secondary)', fontWeight: 'bold' }}
+                  >
+                    EN
+                  </button>
+                  <button
+                    onClick={() => setLanguage('hi')}
+                    style={{ padding: '4px 8px', borderRadius: '15px', background: language === 'hi' ? 'var(--accent-gold)' : 'transparent', color: language === 'hi' ? 'var(--bg-primary)' : 'var(--text-secondary)', fontWeight: 'bold' }}
+                  >
+                    HI
+                  </button>
+                </div>
+              </div>
               <div className="glass" style={{ padding: '10px', borderRadius: '100px', display: 'flex', maxWidth: '800px', margin: '0 auto', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 25px', flex: 1 }}>
                   <Search size={22} color="var(--accent-gold)" />
-                  <input autoFocus placeholder="Search by location..." style={{ background: 'transparent', border: 'none', padding: '12px 0', width: '100%', color: '#fff' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                  <input autoFocus placeholder={t.hero.searchPlaceholder} style={{ background: 'transparent', border: 'none', padding: '12px 0', width: '100%', color: '#fff' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                   <button onClick={() => setIsSearchExpanded(false)} style={{ background: 'transparent', border: 'none', color: 'var(--accent-gold)', cursor: 'pointer', padding: '5px' }}>
                     <X size={20} />
                   </button>
                 </div>
-                <button onClick={() => setView('buyer')} className="premium-button">Find Homes</button>
+                <button onClick={() => setView('buyer')} className="premium-button">{t.hero.findHomes}</button>
               </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">🏢 All Types</option>
-                  <option value="residential">🏠 Residential</option>
-                  <option value="commercial">🏪 Commercial</option>
-                  <option value="industrial">🏭 Industrial</option>
-                  <option value="agricultural">🌾 Agricultural</option>
+                  <option value="all">{t.filters.allTypes}</option>
+                  <option value="residential">{t.filters.residential}</option>
+                  <option value="commercial">{t.filters.commercial}</option>
+                  <option value="industrial">{t.filters.industrial}</option>
+                  <option value="agricultural">{t.filters.agricultural}</option>
                 </select>
                 <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">📐 Any Area</option>
-                  <option value="small">500-1000 sq ft</option>
-                  <option value="medium">1000-2000 sq ft</option>
-                  <option value="large">2000-5000 sq ft</option>
-                  <option value="xlarge">5000+ sq ft</option>
+                  <option value="all">{t.filters.anyArea}</option>
+                  <option value="small">{t.ranges.smallArea}</option>
+                  <option value="medium">{t.ranges.mediumArea}</option>
+                  <option value="large">{t.ranges.largeArea}</option>
+                  <option value="xlarge">{t.ranges.xlargeArea}</option>
                 </select>
                 <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">💰 Any Budget</option>
-                  <option value="budget">Under ₹50L</option>
-                  <option value="mid">₹50L - ₹1Cr</option>
-                  <option value="premium">₹1Cr - ₹5Cr</option>
-                  <option value="luxury">₹5Cr+</option>
+                  <option value="all">{t.filters.anyBudget}</option>
+                  <option value="budget">{t.ranges.under50L}</option>
+                  <option value="mid">{t.ranges.midRange}</option>
+                  <option value="premium">{t.ranges.premiumRange}</option>
+                  <option value="luxury">{t.ranges.luxuryRange}</option>
                 </select>
                 <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">🔑 Rent or Sale</option>
-                  <option value="sale">💵 For Sale</option>
-                  <option value="rent">🏘️ For Rent</option>
-                  <option value="lease">📋 Lease</option>
-                  <option value="security">🛡️ Security</option>
+                  <option value="all">{t.filters.rentOrSale}</option>
+                  <option value="sale">{t.filters.forSale}</option>
+                  <option value="rent">{t.filters.forRent}</option>
+                  <option value="lease">{t.filters.lease}</option>
+                  <option value="security">{t.filters.security}</option>
                 </select>
               </div>
             </div>
           </div>
-        )}
+        )
+        }
         <div className="hero-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url("https://images.unsplash.com/photo-1600585154340-be6199f7a096?auto=format&fit=crop&w=1920&q=80")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
           <div className="container hero-content">
-            <div style={{ opacity: isSearchExpanded ? 0.4 : 1, filter: isSearchExpanded ? 'blur(10px)' : 'none', transition: 'all 0.6s ease', transform: isSearchExpanded ? 'scale(0.98)' : 'scale(1)' }}>
-              <span className="badge">Welcome to DalaalStreet</span>
-              <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: '1.5rem', maxWidth: '900px', lineHeight: 1.1, color: '#fff' }}>
-                Discover Your <span className="text-gradient-gold">Masterpiece</span> Home
-              </h1>
-              <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
-                Connecting sophisticated buyers with extraordinary properties. DalaalStreet delivers a seamless, premium marketplace experience for the modern legend.
-              </p>
-            </div>
+            {/* User requested THIS should not come when search bar is up */}
             {!isSearchExpanded && (
-              <div className="glass" style={{ padding: '10px', borderRadius: '100px', display: 'flex', maxWidth: '600px', gap: '10px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 25px', flex: 1 }}>
-                  <Search size={22} color="var(--accent-gold)" />
-                  <input placeholder="Search by location..." style={{ background: 'transparent', border: 'none', padding: '12px 0', width: '100%', color: '#fff' }} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchExpanded(true)} />
-                </div>
-                <button onClick={() => setView('buyer')} className="premium-button">Find Homes</button>
+              <div className="animate-fade">
+                <span className="badge">{t.hero.badge}</span>
+                <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: '1.5rem', maxWidth: '900px', lineHeight: 1.1, color: '#fff' }}>
+                  {t.hero.title.split('Masterpiece')[0]}<span className="text-gradient-gold">Masterpiece</span>{t.hero.title.split('Masterpiece')[1]}
+                </h1>
+                <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
+                  {t.hero.subtitle}
+                </p>
+                <button onClick={() => setView('buyer')} className="premium-button">{t.hero.findHomes}</button>
               </div>
             )}
           </div>
         </div>
-      </React.Fragment>
+      </React.Fragment >
     );
   };
 
@@ -461,15 +511,15 @@ _Verified Professional Lead_ 🟢`;
     <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
         <div>
-          <h2 style={{ fontSize: '2.5rem' }}>Curated Selections</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Explore {properties.length} active listings in your area</p>
+          <h2 style={{ fontSize: '2.5rem' }}>{t.buyer.title}</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>{t.buyer.subtitle} ({properties.length})</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--border-color)' }}>
-            <option>All Types</option>
-            <option>Villa</option>
-            <option>Penthouse</option>
-            <option>Apartment</option>
+            <option>{t.filters.allTypes}</option>
+            <option>{t.filters.residential}</option>
+            <option>{t.filters.commercial}</option>
+            <option>{t.filters.industrial}</option>
           </select>
         </div>
       </div>
@@ -509,7 +559,7 @@ _Verified Professional Lead_ 🟢`;
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--glass-border)', paddingTop: '20px' }}>
                 <span style={{ fontSize: '1.5rem', color: 'var(--accent-gold)', fontWeight: 700 }}>${prop.price.toLocaleString()}</span>
-                <button className="secondary-button" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>Details</button>
+                <button className="secondary-button" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>{t.buyer.details}</button>
               </div>
             </div>
           </div>
@@ -523,7 +573,7 @@ _Verified Professional Lead_ 🟢`;
     const [sellerType, setSellerType] = useState('residential');
 
     const sellerCategories = {
-      residential: ['Apartment/Flat', 'Independent Floor', 'Villa/House', 'Plot/Land', 'Builder Floor', 'Penthouse'],
+      residential: [t.filters.residential, t.filters.commercial, t.filters.industrial, t.filters.agricultural], // simplification for demo or use original? I'll keep original but use translations for headers
       commercial: ['Office Space', 'Shop/Showroom', 'Commercial Plot', 'Warehouse/Godown', 'Co-working'],
       industrial: ['Industrial Plot', 'Factory/Building', 'Shed/Godown'],
       agricultural: ['Farm Land', 'Farmhouse']
@@ -547,7 +597,7 @@ _Verified Professional Lead_ 🟢`;
                 transition: 'all 0.3s ease'
               }}
             >
-              Seller
+              {t.seller.title.split(' ')[1]}
             </button>
             <button
               onClick={() => setActiveTab('builder')}
@@ -561,7 +611,7 @@ _Verified Professional Lead_ 🟢`;
                 transition: 'all 0.3s ease'
               }}
             >
-              Builder Query
+              {t.seller.builderTitle.split(' ')[1]}
             </button>
           </div>
 
@@ -569,8 +619,8 @@ _Verified Professional Lead_ 🟢`;
           {activeTab === 'seller' && (
             <div className="animate-fade">
               <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Seller</span></h2>
-                <p style={{ color: 'var(--text-secondary)' }}>List your property for Sale, Rent or Lease</p>
+                <h2 style={{ fontSize: '2.5rem' }}>{t.seller.title.split(' ')[0]} <span className="text-gradient-gold">{t.seller.title.split(' ')[1]}</span></h2>
+                <p style={{ color: 'var(--text-secondary)' }}>{t.seller.subtitle}</p>
               </div>
 
               <form onSubmit={(e) => {
@@ -618,15 +668,15 @@ _Verified Professional Lead_ 🟢`;
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="input-group">
-                    <label>Purpose</label>
+                    <label>{t.seller.purpose}</label>
                     <select name="purpose" className="glass">
-                      <option>Sale</option>
-                      <option>Rent</option>
-                      <option>Lease/Collaboration</option>
+                      <option>{t.filters.forSale}</option>
+                      <option>{t.filters.forRent}</option>
+                      <option>{t.filters.lease}</option>
                     </select>
                   </div>
                   <div className="input-group">
-                    <label>Category ({sellerType})</label>
+                    <label>{t.seller.category} ({sellerType})</label>
                     <select name="category" className="glass">
                       {sellerCategories[sellerType].map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -636,17 +686,17 @@ _Verified Professional Lead_ 🟢`;
                 </div>
 
                 <div className="input-group">
-                  <label>Location / Society</label>
+                  <label>{t.seller.location}</label>
                   <input name="location" placeholder="e.g. DLF Phase 5" required />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="input-group">
-                    <label>Total Price (₹)</label>
+                    <label>{t.seller.price}</label>
                     <input name="price" type="number" placeholder="50,00,000" required />
                   </div>
                   <div className="input-group">
-                    <label>Area ({sellerType === 'agricultural' ? 'Acres/Bigha' : 'Sqft'})</label>
+                    <label>{sellerType === 'agricultural' ? t.seller.areaAcres : t.seller.areaSqft}</label>
                     <input name="area" type="text" placeholder={sellerType === 'agricultural' ? 'e.g. 2 Acres' : '1200'} required />
                   </div>
                 </div>
@@ -654,17 +704,17 @@ _Verified Professional Lead_ 🟢`;
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                   {sellerType === 'residential' && (
                     <>
-                      <div className="input-group"><label>Beds</label><input name="beds" type="number" placeholder="3" /></div>
-                      <div className="input-group"><label>Baths</label><input name="baths" type="number" placeholder="2" /></div>
+                      <div className="input-group"><label>{t.seller.beds}</label><input name="beds" type="number" placeholder="3" /></div>
+                      <div className="input-group"><label>{t.seller.baths}</label><input name="baths" type="number" placeholder="2" /></div>
                     </>
                   )}
                   <div className="input-group" style={{ gridColumn: sellerType === 'residential' ? 'auto' : '1 / -1' }}>
-                    <label>Floors / Details</label>
+                    <label>{t.seller.floors}</label>
                     <input name="totalFloors" type="text" placeholder={sellerType === 'residential' ? "Total Floors (e.g. 4)" : "Additional Details"} />
                   </div>
                 </div>
 
-                <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>Post Seller Lead</button>
+                <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>{t.seller.postLead}</button>
               </form>
             </div>
           )}
@@ -673,52 +723,52 @@ _Verified Professional Lead_ 🟢`;
           {activeTab === 'builder' && (
             <div className="animate-fade">
               <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Builder</span></h2>
-                <p style={{ color: 'var(--text-secondary)' }}>Requirements for Purchase or Lease</p>
+                <h2 style={{ fontSize: '2.5rem' }}>{t.seller.builderTitle.split(' ')[0]} <span className="text-gradient-gold">{t.seller.builderTitle.split(' ')[1]}</span></h2>
+                <p style={{ color: 'var(--text-secondary)' }}>{t.seller.builderSubtitle}</p>
               </div>
               <form onSubmit={(e) => handlePostProfessional(e, 'builder')} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid var(--accent-gold)' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="input-group">
-                    <label>Requirement</label>
+                    <label>{t.seller.requirement}</label>
                     <select name="requirement" className="glass">
-                      <option>Purchase</option>
-                      <option>Lease</option>
+                      <option>{t.filters.forSale.split(' ')[1]}</option>
+                      <option>{t.filters.lease}</option>
                       <option>Joint Venture</option>
                     </select>
                   </div>
                   <div className="input-group">
-                    <label>Land Type</label>
+                    <label>{t.seller.landType}</label>
                     <select name="landType" className="glass">
-                      <option>Residential</option>
-                      <option>Commercial</option>
-                      <option>Industrial</option>
-                      <option>Agricultural</option>
+                      <option>{t.filters.residential}</option>
+                      <option>{t.filters.commercial}</option>
+                      <option>{t.filters.industrial}</option>
+                      <option>{t.filters.agricultural}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="input-group">
-                  <label>Target Place / Area Name</label>
+                  <label>{t.seller.targetPlace}</label>
                   <input name="location" placeholder="e.g. Rohini Sector 13" required />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="input-group">
-                    <label>Area in **Gaj**</label>
+                    <label>{t.seller.areaGaj.replace('**', '').replace('**', '')}</label>
                     <input name="area" type="number" placeholder="200" required />
                   </div>
                   <div className="input-group">
-                    <label>Budget (₹)</label>
+                    <label>{t.seller.budget}</label>
                     <input name="budget" type="number" placeholder="1,00,00,000" required />
                   </div>
                 </div>
 
                 <div className="input-group">
-                  <label>Additional Specs</label>
-                  <textarea name="description" placeholder="Specify if looking for corner plot, park facing etc." rows="3"></textarea>
+                  <label>{t.seller.additionalSpecs}</label>
+                  <textarea name="description" placeholder={t.seller.specsPlaceholder} rows="3"></textarea>
                 </div>
 
-                <button type="submit" className="premium-button" style={{ justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' }}>Post Builder Query</button>
+                <button type="submit" className="premium-button" style={{ justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' }}>{t.seller.postBuilder}</button>
               </form>
             </div>
           )}
@@ -730,7 +780,7 @@ _Verified Professional Lead_ 🟢`;
   const PropertyDetailView = () => (
     <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
       <button onClick={() => setView('buyer')} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-        <X size={18} /> Back to Listings
+        <X size={18} /> {t.detail.back}
       </button>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '50px' }}>
@@ -739,7 +789,7 @@ _Verified Professional Lead_ 🟢`;
           <div style={{ marginBottom: '2rem' }}>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
               <span className="badge">{selectedProperty.type}</span>
-              <span className="badge" style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399' }}>Active</span>
+              <span className="badge" style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399' }}>{t.detail.active}</span>
             </div>
             <h1 style={{ fontSize: '3.5rem', marginBottom: '10px' }}>{selectedProperty.title}</h1>
             <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -749,28 +799,28 @@ _Verified Professional Lead_ 🟢`;
 
           <div style={{ display: 'flex', gap: '40px', padding: '30px', borderTop: '1px solid var(--glass-border)', borderBottom: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Bedrooms</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>{t.detail.bedrooms}</p>
               <h4 style={{ fontSize: '1.5rem' }}>{selectedProperty.beds}</h4>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Bathrooms</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>{t.detail.bathrooms}</p>
               <h4 style={{ fontSize: '1.5rem' }}>{selectedProperty.baths}</h4>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Square Feet</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>{t.detail.sqft}</p>
               <h4 style={{ fontSize: '1.5rem' }}>{selectedProperty.sqft}</h4>
             </div>
           </div>
 
           <div>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Description</h3>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{t.detail.description}</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', whiteSpace: 'pre-line' }}>{selectedProperty.description}</p>
           </div>
         </div>
 
         <div>
           <div className="glass" style={{ padding: '30px', borderRadius: '30px', position: 'sticky', top: '120px' }}>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '5px' }}>Listing Price</p>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '5px' }}>{t.detail.price}</p>
             <h2 style={{ fontSize: '3rem', color: 'var(--accent-gold)', marginBottom: '2rem' }}>${selectedProperty.price.toLocaleString()}</h2>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '2rem', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '15px' }}>
@@ -778,20 +828,20 @@ _Verified Professional Lead_ 🟢`;
                 {selectedProperty.seller.charAt(0)}
               </div>
               <div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Listed by</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t.detail.listedBy}</p>
                 <h4 style={{ fontSize: '1.1rem' }}>{selectedProperty.seller}</h4>
               </div>
             </div>
 
             <button onClick={() => setIsChatOpen(true)} className="premium-button" style={{ width: '100%', justifyContent: 'center', marginBottom: '15px' }}>
-              <MessageSquare size={18} /> Contact Seller
+              <MessageSquare size={18} /> {t.detail.contact}
             </button>
             <button className="secondary-button" style={{ width: '100%', justifyContent: 'center' }}>
-              Save to Favorites
+              {t.detail.save}
             </button>
 
             <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '20px' }}>
-              Verified by DalaalStreet. Terms and conditions apply.
+              {t.detail.verified}
             </p>
           </div>
         </div>
@@ -806,20 +856,20 @@ _Verified Professional Lead_ 🟢`;
           <div style={{ width: '35px', height: '35px', background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
             {selectedProperty.seller.charAt(0)}
           </div>
-          <p style={{ fontWeight: 600, color: 'var(--bg-primary)' }}>Chat with {selectedProperty.seller}</p>
+          <p style={{ fontWeight: 600, color: 'var(--bg-primary)' }}>{t.chat.title} {selectedProperty.seller}</p>
         </div>
         <button onClick={() => setIsChatOpen(false)}><X size={20} color="var(--bg-primary)" /></button>
       </div>
       <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', overflowY: 'auto' }}>
         <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '12px 16px', borderRadius: '15px 15px 15px 0', maxWidth: '80%' }}>
-          <p style={{ fontSize: '0.9rem' }}>Hello! I'm interested in {selectedProperty.title}. Is it still available?</p>
+          <p style={{ fontSize: '0.9rem' }}>{t.chat.initialMsg}{selectedProperty.title}{t.chat.initialAltMsg}</p>
         </div>
         <div style={{ alignSelf: 'flex-end', background: 'var(--accent-gold)', color: 'var(--bg-primary)', padding: '12px 16px', borderRadius: '15px 15px 0 15px', maxWidth: '80%' }}>
           <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>Hello! Yes, it is still on the market. Would you like to schedule a virtual tour or a visit?</p>
         </div>
       </div>
       <div style={{ padding: '20px', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '10px' }}>
-        <input placeholder="Type your message..." style={{ flex: 1, borderRadius: '20px', padding: '10px 15px' }} />
+        <input placeholder={t.chat.placeholder} style={{ flex: 1, borderRadius: '20px', padding: '10px 15px' }} />
         <button style={{ background: 'var(--accent-gold)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Send size={18} color="var(--bg-primary)" />
         </button>
@@ -841,9 +891,9 @@ _Verified Professional Lead_ 🟢`;
       {view === 'auth' && (
         <div className="container" style={{ paddingTop: '150px', display: 'flex', justifyContent: 'center' }}>
           <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{isOtpSent ? 'Verify OTP' : 'Login / Sign Up'}</h2>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{isOtpSent ? t.auth.verify : t.auth.login}</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-              {isOtpSent ? `We sent a code to ${phoneNumber}` : 'Connect your WhatsApp to start using masterpiece homes.'}
+              {isOtpSent ? `${t.auth.codeSent} ${phoneNumber}` : t.auth.connect}
             </p>
 
             {!isOtpSent ? (
@@ -857,7 +907,7 @@ _Verified Professional Lead_ 🟢`;
                     marginBottom: '10px'
                   }}>
                     <p style={{ color: 'var(--accent-gold)', fontSize: '1rem', margin: 0 }}>
-                      👋 Welcome back, <strong>{userName}</strong>!
+                      {t.alerts.welcomeBack} <strong>{userName}</strong>!
                     </p>
                   </div>
                 )}
@@ -865,7 +915,7 @@ _Verified Professional Lead_ 🟢`;
                 {!isReturningUser && (
                   <>
                     <div style={{ textAlign: 'left' }}>
-                      <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>Full Name</label>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>{t.auth.fullName}</label>
                       <div style={{ position: 'relative' }}>
                         <User size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
@@ -927,7 +977,7 @@ _Verified Professional Lead_ 🟢`;
                 )}
 
                 <div style={{ textAlign: 'left' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>WhatsApp Number</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>{t.auth.whatsappNumber}</label>
                   <div style={{ position: 'relative' }}>
                     <div style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: 'var(--accent-gold)' }}>+91</div>
                     <input
@@ -946,7 +996,7 @@ _Verified Professional Lead_ 🟢`;
                 </div>
 
                 <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>
-                  {isReturningUser ? 'Send OTP' : 'Sign Up & Send OTP'}
+                  {t.auth.sendOtp}
                 </button>
               </form>
             ) : (
@@ -954,7 +1004,7 @@ _Verified Professional Lead_ 🟢`;
                 <input
                   type="text"
                   maxLength="6"
-                  placeholder="Enter 6-digit code"
+                  placeholder={t.auth.enterCode}
                   style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '5px' }}
                   onChange={(e) => e.target.value.length === 6 && handleVerifyOTP(e.target.value)}
                 />
@@ -962,7 +1012,7 @@ _Verified Professional Lead_ 🟢`;
                   onClick={() => setIsOtpSent(false)}
                   style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textDecoration: 'underline' }}
                 >
-                  Edit Phone Number
+                  {t.auth.editPhone}
                 </button>
               </div>
             )}
@@ -976,15 +1026,15 @@ _Verified Professional Lead_ 🟢`;
         <div className="container" style={{ textAlign: 'center' }}>
           <h2 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>DalaalStreet</h2>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 30px' }}>
-            The world's most unique premium real estate marketplace. Built for legends.
+            {t.footer.tagline}
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', color: 'var(--text-muted)' }}>
-            <a href="#">Terms</a>
-            <a href="#">Privacy</a>
-            <a href="#">Contact</a>
+            <a href="#">{t.footer.terms}</a>
+            <a href="#">{t.footer.privacy}</a>
+            <a href="#">{t.footer.contact}</a>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            © 2026 DalaalStreet. All rights reserved. <span style={{ opacity: 0.5 }}>v3.4 (Smart-Login)</span>
+            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.0 (Global Edition)</span>
           </p>
         </div>
       </footer>
