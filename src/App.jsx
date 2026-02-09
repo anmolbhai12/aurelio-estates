@@ -40,6 +40,19 @@ function App() {
   const WHATSAPP_PROXY_URL = 'https://dalaalstreetss.alwaysdata.net/send-otp';
   const SIGNUP_LOG_URL = 'https://script.google.com/macros/s/AKfycbxUzjYHqFUUxULp0z2wlZB_AhO57If_1guXP0IYlg0WVwdNlu0sA3tjeb3UuIDkKmt_qA/exec';
 
+  // Auth Persistence
+  useEffect(() => {
+    const savedUser = localStorage.getItem('dalaal_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+        setView('landing'); // Restore landing view or last view? landing is safer.
+      } catch (e) {
+        localStorage.removeItem('dalaal_user');
+      }
+    }
+  }, []);
+
   // Animation Effects
   useEffect(() => {
     if (view === 'landing') {
@@ -111,7 +124,9 @@ function App() {
 
   const handleVerifyOTP = (enteredCode) => {
     if (enteredCode === otp) {
-      setUser({ phone: phoneNumber });
+      const userData = { phone: phoneNumber, name: userName };
+      setUser(userData);
+      localStorage.setItem('dalaal_user', JSON.stringify(userData));
 
       // Log ONLY new users to spreadsheet
       if (isNewUser) {

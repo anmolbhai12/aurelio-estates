@@ -15,7 +15,15 @@ const messageLogs = []; // Store last 20 messages for debugging
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname)); // Serve static files from the current directory
+app.use(express.static(__dirname, {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
+            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        }
+    }
+})); // Serve static files from the current directory
 
 const bot = new WhatsAppBot();
 
