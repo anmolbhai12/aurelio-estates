@@ -914,6 +914,20 @@ _Verified Professional Lead_ 🟢`;
                   </div>
                 </div>
 
+                <div style={{ textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>Email (Optional)</label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      type="email"
+                      placeholder="name@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{ width: '100%', marginTop: '5px', paddingLeft: '45px' }}
+                    />
+                  </div>
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <div style={{ textAlign: 'left' }}>
                     <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>City</label>
@@ -1003,7 +1017,7 @@ _Verified Professional Lead_ 🟢`;
             <a href="#">{t.footer.contact}</a>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.4 (Bakenovation Edition)</span>
+            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.5 (Restore Edition)</span>
           </p>
         </div>
       </footer>
