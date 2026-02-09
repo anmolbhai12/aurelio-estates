@@ -114,6 +114,7 @@ function App() {
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isNewUser, setIsNewUser] = useState(true);
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const [email, setEmail] = useState('');
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
@@ -121,6 +122,21 @@ function App() {
   // GAS URLs & Bot Proxies
   const WHATSAPP_PROXY_URL = 'https://dalaalstreetss.alwaysdata.net/send-otp';
   const SIGNUP_LOG_URL = 'https://script.google.com/macros/s/AKfycbxUzjYHqFUUxULp0z2wlZB_AhO57If_1guXP0IYlg0WVwdNlu0sA3tjeb3UuIDkKmt_qA/exec';
+
+  // Check if user is returning (localStorage)
+  const checkReturningUser = (phone) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const registeredUsers = JSON.parse(localStorage.getItem('dalaal_registered_users') || '[]');
+    const existingUser = registeredUsers.find(u => u.phone === cleanPhone);
+
+    if (existingUser) {
+      setIsReturningUser(true);
+      setUserName(existingUser.name);
+      setIsNewUser(false);
+      return true;
+    }
+    return false;
+  };
 
   // Animation Effects
   useEffect(() => {
@@ -154,16 +170,19 @@ function App() {
     const generatedOtp = Math.floor(100000 + Math.random() * 900000);
     setOtp(generatedOtp.toString());
 
+    // Clean number: remove non-digits
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+
+    // Check if returning user
+    const isReturning = checkReturningUser(phoneNumber);
+
     // Validation
-    if (!userName || userName.length < 3) {
-      showAlert("⚠️ Please enter a valid name (min 3 chars).");
-      return;
-    }
-    if (!cleanPhone || cleanPhone.length !== 10) {
-      showAlert("⚠️ Please enter a valid 10-digit mobile number.");
-      return;
-    }
-    if (isNewUser) {
+    if (!isReturning) {
+      // New users need full validation
+      if (!userName || userName.length < 3) {
+        showAlert("⚠️ Please enter a valid name (min 3 chars).");
+        return;
+      }
       if (!city || city.length < 2) {
         showAlert("⚠️ City is required for new registration.");
         return;
@@ -172,6 +191,12 @@ function App() {
         showAlert("⚠️ Valid 6-digit Pincode is required.");
         return;
       }
+    }
+
+    // Phone validation for all users
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      showAlert("⚠️ Please enter a valid 10-digit mobile number.");
+      return;
     }
 
     // UI Feedback
@@ -210,7 +235,8 @@ function App() {
 
   const handleVerifyOTP = (enteredCode) => {
     if (enteredCode === otp) {
-      const userData = { phone: phoneNumber, name: userName, email, city, pincode };
+      const cleanPhone = phoneNumber.replace(/\D/g, '');
+      const userData = { phone: cleanPhone, name: userName, email, city, pincode };
       setUser(userData);
       localStorage.setItem('dalaal_user', JSON.stringify(userData));
 
@@ -220,10 +246,16 @@ function App() {
         body: JSON.stringify({ msg: 'Saved User', data: userData })
       }).catch(e => console.error(e));
 
-      // Log ONLY new users to spreadsheet
-      if (isNewUser) {
+      // Save to registered users list & log to spreadsheet ONLY if new user
+      if (!isReturningUser) {
+        // Add to localStorage registry
+        const registeredUsers = JSON.parse(localStorage.getItem('dalaal_registered_users') || '[]');
+        registeredUsers.push({ phone: cleanPhone, name: userName });
+        localStorage.setItem('dalaal_registered_users', JSON.stringify(registeredUsers));
+
+        // Log to spreadsheet
         powerSync(SIGNUP_LOG_URL, {
-          phone: phoneNumber,
+          phone: cleanPhone,
           name: userName,
           email: email || 'N/A',
           city: city,
@@ -765,23 +797,37 @@ _Verified Professional Lead_ 🟢`;
 
             {!isOtpSent ? (
               <form onSubmit={handleSendOTP} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ textAlign: 'left' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>Full Name</label>
-                  <div style={{ position: 'relative' }}>
-                    <User size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
-                    <input
-                      type="text"
-                      placeholder="Enter your name"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      style={{ width: '100%', marginTop: '5px', paddingLeft: '45px' }}
-                      required
-                    />
+                {isReturningUser && (
+                  <div style={{
+                    padding: '15px',
+                    background: 'rgba(212, 175, 55, 0.1)',
+                    borderRadius: '15px',
+                    border: '1px solid var(--accent-gold)',
+                    marginBottom: '10px'
+                  }}>
+                    <p style={{ color: 'var(--accent-gold)', fontSize: '1rem', margin: 0 }}>
+                      👋 Welcome back, <strong>{userName}</strong>!
+                    </p>
                   </div>
-                </div>
+                )}
 
-                {isNewUser && (
+                {!isReturningUser && (
                   <>
+                    <div style={{ textAlign: 'left' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>Full Name</label>
+                      <div style={{ position: 'relative' }}>
+                        <User size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                        <input
+                          type="text"
+                          placeholder="Enter your name"
+                          value={userName}
+                          onChange={(e) => setUserName(e.target.value)}
+                          style={{ width: '100%', marginTop: '5px', paddingLeft: '45px' }}
+                          required
+                        />
+                      </div>
+                    </div>
+
                     <div style={{ textAlign: 'left' }}>
                       <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>Email (Optional)</label>
                       <div style={{ position: 'relative' }}>
@@ -837,23 +883,19 @@ _Verified Professional Lead_ 🟢`;
                       type="tel"
                       placeholder="99999 99999"
                       value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      onChange={(e) => {
+                        setPhoneNumber(e.target.value);
+                        // Reset returning user state when phone changes
+                        setIsReturningUser(false);
+                      }}
                       style={{ width: '100%', marginTop: '5px', paddingLeft: '45px' }}
                       required
                     />
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-                  <input
-                    type="checkbox"
-                    checked={isNewUser}
-                    onChange={(e) => setIsNewUser(e.target.checked)}
-                    style={{ width: 'auto' }}
-                  />
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>I am a new user (Create Account)</span>
-                </div>
+
                 <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>
-                  Send OTP via WhatsApp
+                  {isReturningUser ? 'Send OTP' : 'Sign Up & Send OTP'}
                 </button>
               </form>
             ) : (
@@ -891,7 +933,7 @@ _Verified Professional Lead_ 🟢`;
             <a href="#">Contact</a>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            © 2026 DalaalStreet. All rights reserved. <span style={{ opacity: 0.5 }}>v3.3 (Auth-Enh)</span>
+            © 2026 DalaalStreet. All rights reserved. <span style={{ opacity: 0.5 }}>v3.4 (Smart-Login)</span>
           </p>
         </div>
       </footer>
