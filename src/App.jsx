@@ -305,115 +305,156 @@ _Verified Professional Lead_ 🟢`;
     </div>
   );
 
-  const PostPropertyView = () => (
-    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Seller Section */}
-        <div className="animate-fade">
-          <div style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Seller</span></h2>
-            <p style={{ color: 'var(--text-secondary)' }}>List for Sale, Rent or Security</p>
+  const PostPropertyView = () => {
+    const [activeTab, setActiveTab] = useState('seller');
+
+    return (
+      <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+
+          {/* Tab Switcher */}
+          <div className="glass" style={{ display: 'flex', padding: '5px', borderRadius: '50px', marginBottom: '30px', maxWidth: '400px', margin: '0 auto 30px' }}>
+            <button
+              onClick={() => setActiveTab('seller')}
+              style={{
+                flex: 1,
+                padding: '12px 20px',
+                borderRadius: '40px',
+                background: activeTab === 'seller' ? 'var(--accent-gold)' : 'transparent',
+                color: activeTab === 'seller' ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                fontWeight: activeTab === 'seller' ? '700' : '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Seller
+            </button>
+            <button
+              onClick={() => setActiveTab('builder')}
+              style={{
+                flex: 1,
+                padding: '12px 20px',
+                borderRadius: '40px',
+                background: activeTab === 'builder' ? 'var(--accent-gold)' : 'transparent',
+                color: activeTab === 'builder' ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                fontWeight: activeTab === 'builder' ? '700' : '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Builder Query
+            </button>
           </div>
-          <form onSubmit={(e) => handlePostProfessional(e, 'seller')} className="glass" style={{ padding: '30px', borderRadius: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div className="input-group">
-                <label>Purpose</label>
-                <select name="purpose" className="glass">
-                  <option>Sale</option>
-                  <option>Rent</option>
-                  <option>Security/Lease</option>
-                </select>
+
+          {/* Seller Section */}
+          {activeTab === 'seller' && (
+            <div className="animate-fade">
+              <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Seller</span></h2>
+                <p style={{ color: 'var(--text-secondary)' }}>List for Sale, Rent or Security</p>
               </div>
-              <div className="input-group">
-                <label>Category</label>
-                <select name="category" className="glass">
-                  <option>Floor</option>
-                  <option>Whole Building</option>
-                  <option>Plot/Land</option>
-                  <option>Commercial</option>
-                </select>
+              <form onSubmit={(e) => handlePostProfessional(e, 'seller')} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="input-group">
+                    <label>Purpose</label>
+                    <select name="purpose" className="glass">
+                      <option>Sale</option>
+                      <option>Rent</option>
+                      <option>Security/Lease</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
+                    <label>Category</label>
+                    <select name="category" className="glass">
+                      <option>Floor</option>
+                      <option>Whole Building</option>
+                      <option>Plot/Land</option>
+                      <option>Commercial</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Location / Society</label>
+                  <input name="location" placeholder="e.g. DLF Phase 5" required />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="input-group">
+                    <label>Total Price (₹)</label>
+                    <input name="price" type="number" placeholder="50,00,000" required />
+                  </div>
+                  <div className="input-group">
+                    <label>Area (Sqft)</label>
+                    <input name="area" type="number" placeholder="1200" required />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                  <div className="input-group"><label>Beds</label><input name="beds" type="number" placeholder="3" /></div>
+                  <div className="input-group"><label>Baths</label><input name="baths" type="number" placeholder="2" /></div>
+                  <div className="input-group"><label>Floors</label><input name="totalFloors" type="number" placeholder="4" /></div>
+                </div>
+
+                <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>Post Seller Lead</button>
+              </form>
+            </div>
+          )}
+
+          {/* Builder Section */}
+          {activeTab === 'builder' && (
+            <div className="animate-fade">
+              <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Builder</span></h2>
+                <p style={{ color: 'var(--text-secondary)' }}>Requirements for Purchase or Lease</p>
               </div>
+              <form onSubmit={(e) => handlePostProfessional(e, 'builder')} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid var(--accent-gold)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="input-group">
+                    <label>Requirement</label>
+                    <select name="requirement" className="glass">
+                      <option>Purchase</option>
+                      <option>Lease</option>
+                      <option>Joint Venture</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
+                    <label>Land Type</label>
+                    <select name="landType" className="glass">
+                      <option>Residential</option>
+                      <option>Commercial</option>
+                      <option>Industrial</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Target Place / Area Name</label>
+                  <input name="location" placeholder="e.g. Rohini Sector 13" required />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="input-group">
+                    <label>Area in **Gaj**</label>
+                    <input name="area" type="number" placeholder="200" required />
+                  </div>
+                  <div className="input-group">
+                    <label>Budget (₹)</label>
+                    <input name="budget" type="number" placeholder="1,00,00,000" required />
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Additional Specs</label>
+                  <textarea name="description" placeholder="Specify if looking for corner plot, park facing etc." rows="3"></textarea>
+                </div>
+
+                <button type="submit" className="premium-button" style={{ justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' }}>Post Builder Query</button>
+              </form>
             </div>
-
-            <div className="input-group">
-              <label>Location / Society</label>
-              <input name="location" placeholder="e.g. DLF Phase 5" required />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div className="input-group">
-                <label>Total Price (₹)</label>
-                <input name="price" type="number" placeholder="50,00,000" required />
-              </div>
-              <div className="input-group">
-                <label>Area (Sqft)</label>
-                <input name="area" type="number" placeholder="1200" required />
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-              <div className="input-group"><label>Beds</label><input name="beds" type="number" placeholder="3" /></div>
-              <div className="input-group"><label>Baths</label><input name="baths" type="number" placeholder="2" /></div>
-              <div className="input-group"><label>Floors</label><input name="totalFloors" type="number" placeholder="4" /></div>
-            </div>
-
-            <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>Post Seller Lead</button>
-          </form>
-        </div>
-
-        {/* Builder Section */}
-        <div className="animate-fade" style={{ animationDelay: '0.2s' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Builder</span></h2>
-            <p style={{ color: 'var(--text-secondary)' }}>Requirements for Purchase or Lease</p>
-          </div>
-          <form onSubmit={(e) => handlePostProfessional(e, 'builder')} className="glass" style={{ padding: '30px', borderRadius: '25px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid var(--accent-gold)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div className="input-group">
-                <label>Requirement</label>
-                <select name="requirement" className="glass">
-                  <option>Purchase</option>
-                  <option>Lease</option>
-                  <option>Joint Venture</option>
-                </select>
-              </div>
-              <div className="input-group">
-                <label>Land Type</label>
-                <select name="landType" className="glass">
-                  <option>Residential</option>
-                  <option>Commercial</option>
-                  <option>Industrial</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Target Place / Area Name</label>
-              <input name="location" placeholder="e.g. Rohini Sector 13" required />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div className="input-group">
-                <label>Area in **Gaj**</label>
-                <input name="area" type="number" placeholder="200" required />
-              </div>
-              <div className="input-group">
-                <label>Budget (₹)</label>
-                <input name="budget" type="number" placeholder="1,00,00,000" required />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Additional Specs</label>
-              <textarea name="description" placeholder="Specify if looking for corner plot, park facing etc." rows="3"></textarea>
-            </div>
-
-            <button type="submit" className="premium-button" style={{ justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' }}>Post Builder Query</button>
-          </form>
+          )}
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const PropertyDetailView = () => (
     <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
