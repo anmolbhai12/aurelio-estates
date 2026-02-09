@@ -28,8 +28,85 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Auth State
-  const [user, setUser] = useState(null);
+  // Modal State
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+
+  const showAlert = (msg) => setModal({ isOpen: true, type: 'alert', message: msg, onConfirm: null });
+  const showConfirm = (msg, onConfirm) => setModal({ isOpen: true, type: 'confirm', message: msg, onConfirm });
+  const closeModal = () => setModal({ ...modal, isOpen: false });
+
+  // Custom Modal Component
+  const CustomModal = () => {
+    if (!modal.isOpen) return null;
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+        background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backdropFilter: 'blur(5px)'
+      }}>
+        <div className="glass" style={{
+          padding: '40px', borderRadius: '20px', maxWidth: '400px', width: '90%',
+          textAlign: 'center', border: '1px solid var(--accent-gold)', boxShadow: '0 0 30px rgba(212, 175, 55, 0.2)'
+        }}>
+          <h3 style={{ color: 'var(--accent-gold)', fontSize: '1.5rem', marginBottom: '1.5rem', fontFamily: 'Playfair Display' }}>
+            {modal.type === 'confirm' ? 'Confirmation' : 'Notification'}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
+            {modal.message}
+          </p>
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+            {modal.type === 'confirm' && (
+              <button
+                onClick={closeModal}
+                style={{
+                  padding: '12px 30px', borderRadius: '50px', background: 'transparent',
+                  border: '1px solid var(--text-secondary)', color: 'var(--text-secondary)', cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              onClick={() => {
+                if (modal.onConfirm) modal.onConfirm();
+                closeModal();
+              }}
+              className="premium-button"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Auth State - Lazy Initialization for Persistence
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dalaal_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        console.log('✅ Lazy init restored user:', parsed);
+        fetch('https://dalaalstreetss.alwaysdata.net/client-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ msg: 'Restored User', data: parsed })
+        }).catch(e => console.error(e));
+        return parsed;
+      }
+    } catch (e) {
+      console.error('❌ Lazy init error:', e);
+      localStorage.removeItem('dalaal_user');
+    }
+    fetch('https://dalaalstreetss.alwaysdata.net/client-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ msg: 'No User Found', data: null })
+    }).catch(e => console.error(e));
+    return null;
+  });
+
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userName, setUserName] = useState('');
   const [otp, setOtp] = useState('');
@@ -40,19 +117,6 @@ function App() {
   const WHATSAPP_PROXY_URL = 'https://dalaalstreetss.alwaysdata.net/send-otp';
   const SIGNUP_LOG_URL = 'https://script.google.com/macros/s/AKfycbxUzjYHqFUUxULp0z2wlZB_AhO57If_1guXP0IYlg0WVwdNlu0sA3tjeb3UuIDkKmt_qA/exec';
 
-  // Auth Persistence
-  useEffect(() => {
-    const savedUser = localStorage.getItem('dalaal_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-        setView('landing'); // Restore landing view or last view? landing is safer.
-      } catch (e) {
-        localStorage.removeItem('dalaal_user');
-      }
-    }
-  }, []);
-
   // Animation Effects
   useEffect(() => {
     if (view === 'landing') {
@@ -60,7 +124,7 @@ function App() {
         y: 50,
         opacity: 0,
         stagger: 0.2,
-        duration: 1,
+        duration: 1, // ...
         ease: 'power3.out'
       });
     }
@@ -110,13 +174,13 @@ function App() {
         setIsOtpSent(true);
       } else {
         const errData = await response.json();
-        alert(`❌ Error from Bot: ${errData.error || 'Unknown error'}`);
+        showAlert(`❌ Error from Bot: ${errData.error || 'Unknown error'}`);
         btn.innerText = originalText;
         btn.disabled = false;
       }
     } catch (err) {
       console.error('❌ Network Error:', err);
-      alert(`❌ Connection Issue: ${err.message}. Please check if https://dalaalstreetss.alwaysdata.net/status is online.`);
+      showAlert(`❌ Connection Issue: ${err.message}. Please check if https://dalaalstreetss.alwaysdata.net/status is online.`);
       btn.innerText = originalText;
       btn.disabled = false;
     }
@@ -127,6 +191,12 @@ function App() {
       const userData = { phone: phoneNumber, name: userName };
       setUser(userData);
       localStorage.setItem('dalaal_user', JSON.stringify(userData));
+
+      fetch('https://dalaalstreetss.alwaysdata.net/client-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ msg: 'Saved User', data: userData })
+      }).catch(e => console.error(e));
 
       // Log ONLY new users to spreadsheet
       if (isNewUser) {
@@ -139,7 +209,7 @@ function App() {
 
       setView('landing');
     } else {
-      alert("Invalid code. Please try again.");
+      showAlert("Invalid code. Please try again.");
     }
   };
 
@@ -200,11 +270,11 @@ _Verified Professional Lead_ 🟢`;
       };
 
       setProperties([newProp, ...properties]);
-      alert("✅ Your professional listing is live! Check your WhatsApp for the summary.");
+      showAlert("✅ Your professional listing is live! Check your WhatsApp for the summary.");
       setView('buyer');
     } catch (err) {
       console.error(err);
-      alert("❌ Listing partially failed. Bot might be offline.");
+      showAlert("❌ Listing partially failed. Bot might be offline.");
       btn.innerText = originalText;
       btn.disabled = false;
     }
@@ -224,13 +294,31 @@ _Verified Professional Lead_ 🟢`;
           <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
             <Plus size={18} /> Post Your Property
           </button>
-          <button
-            onClick={() => !user && setView('auth')}
-            style={{ color: user ? 'var(--accent-gold)' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <User size={20} />
-            {user && <span style={{ fontSize: '0.8rem' }}>Connected</span>}
-          </button>
+
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)' }}>{user.name || 'Legend'}</span>
+              <button
+                onClick={() => {
+                  if (confirm('Log out?')) {
+                    setUser(null);
+                    localStorage.removeItem('dalaal_user');
+                    setView('landing');
+                  }
+                }}
+                style={{ color: 'var(--text-secondary)', cursor: 'pointer' }}
+              >
+                <User size={20} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setView('auth')}
+              style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <User size={20} />
+            </button>
+          )}
         </div>
       </div>
     </nav>
@@ -646,7 +734,7 @@ _Verified Professional Lead_ 🟢`;
           <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
             <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{isOtpSent ? 'Verify OTP' : 'Login / Sign Up'}</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-              {isOtpSent ? `We sent a code to ${phoneNumber}` : 'Connect your WhatsApp to start trading masterpiece homes.'}
+              {isOtpSent ? `We sent a code to ${phoneNumber}` : 'Connect your WhatsApp to start using masterpiece homes.'}
             </p>
 
             {!isOtpSent ? (
@@ -720,7 +808,9 @@ _Verified Professional Lead_ 🟢`;
             <a href="#">Privacy</a>
             <a href="#">Contact</a>
           </div>
-          <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>© 2026 DalaalStreet. All rights reserved.</p>
+          <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            © 2026 DalaalStreet. All rights reserved. <span style={{ opacity: 0.5 }}>v3.0 (Premium-Modals)</span>
+          </p>
         </div>
       </footer>
     </div>

@@ -118,23 +118,6 @@ app.all('/send-otp', async (req, res) => {
     }
 });
 
-app.post('/client-log', (req, res) => {
-    const { msg, data } = req.body;
-    const logEntry = `[CLIENT] ${new Date().toISOString()} - ${msg} - ${JSON.stringify(data)}\n`;
-    console.log(logEntry.trim());
-    try { fs.appendFileSync(path.join(__dirname, 'client_debug.log'), logEntry); } catch (e) { }
-    res.sendStatus(200);
-});
-
-app.get('/client-logs', (req, res) => {
-    try {
-        const logs = fs.readFileSync(path.join(__dirname, 'client_debug.log'), 'utf8');
-        res.send(`<pre>${logs}</pre>`);
-    } catch (e) {
-        res.send('No client logs yet.');
-    }
-});
-
 app.all('/send-msg', async (req, res) => {
     const phone = req.query.phone || req.body.phone;
     const message = req.query.message || req.body.message;
