@@ -465,7 +465,6 @@ _Verified Professional Lead_ 🟢`;
                   <option value="sale">{t.filters.forSale}</option>
                   <option value="rent">{t.filters.forRent}</option>
                   <option value="lease">{t.filters.lease}</option>
-                  <option value="security">{t.filters.security}</option>
                 </select>
               </div>
             </div>
@@ -1067,7 +1066,7 @@ _Verified Professional Lead_ 🟢`;
             <a href="#">{t.footer.contact}</a>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.8 (Real Estate Edition)</span>
+            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.9 (Refined Edition)</span>
           </p>
         </div>
       </footer>
