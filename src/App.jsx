@@ -151,11 +151,14 @@ function App() {
 *User:* ${userName}
 *Phone:* ${phoneNumber}
 *Role:* ${type === 'seller' ? 'Seller/Owner' : 'Builder/Investor'}
+${data.activePropertyType ? `*Type:* ${data.activePropertyType.toUpperCase()}` : ''}
 *Purpose:* ${data.purpose || data.requirement}
-*Property:* ${data.category || data.landType}
-*Area:* ${data.area} ${type === 'seller' ? 'sqft' : 'Gaj'}
+*Category:* ${data.category || data.landType}
+*Area:* ${data.area} ${type === 'seller' ? (data.activePropertyType === 'agricultural' ? 'Acres' : 'sqft') : 'Gaj'}
 *Price/Budget:* ₹${data.price || data.budget}
 *Location:* ${data.location}
+${data.totalFloors ? `*Details:* ${data.totalFloors}` : ''}
+${data.description ? `*Note:* ${data.description}` : ''}
 -------------------------------
 _Verified Professional Lead_ 🟢`;
 
@@ -201,9 +204,8 @@ _Verified Professional Lead_ 🟢`;
           </div>
           <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>DalaalStreet</h2>
         </div>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <button onClick={() => setView('buyer')} style={{ color: view === 'buyer' ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>Marketplace</button>
-          <button onClick={() => setView('builders')} style={{ color: view === 'builders' ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>Builders</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <a onClick={() => setView('buyer')} style={{ cursor: 'pointer', color: 'var(--text-primary)', fontWeight: '500' }}>Marketplace</a>
           <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
             <Plus size={18} /> Post Your Property
           </button>
@@ -307,12 +309,20 @@ _Verified Professional Lead_ 🟢`;
 
   const PostPropertyView = () => {
     const [activeTab, setActiveTab] = useState('seller');
+    const [sellerType, setSellerType] = useState('residential');
+
+    const sellerCategories = {
+      residential: ['Apartment/Flat', 'Independent Floor', 'Villa/House', 'Plot/Land', 'Builder Floor', 'Penthouse'],
+      commercial: ['Office Space', 'Shop/Showroom', 'Commercial Plot', 'Warehouse/Godown', 'Co-working'],
+      industrial: ['Industrial Plot', 'Factory/Building', 'Shed/Godown'],
+      agricultural: ['Farm Land', 'Farmhouse']
+    };
 
     return (
       <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 
-          {/* Tab Switcher */}
+          {/* Main Role Switcher */}
           <div className="glass" style={{ display: 'flex', padding: '5px', borderRadius: '50px', marginBottom: '30px', maxWidth: '400px', margin: '0 auto 30px' }}>
             <button
               onClick={() => setActiveTab('seller')}
@@ -349,25 +359,67 @@ _Verified Professional Lead_ 🟢`;
             <div className="animate-fade">
               <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
                 <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Seller</span></h2>
-                <p style={{ color: 'var(--text-secondary)' }}>List for Sale, Rent or Security</p>
+                <p style={{ color: 'var(--text-secondary)' }}>List your property for Sale, Rent or Lease</p>
               </div>
-              <form onSubmit={(e) => handlePostProfessional(e, 'seller')} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+              <form onSubmit={(e) => {
+                // Intercept to add sellerType to the message
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+
+                // Add sellerType to the data object for the handlePostProfessional function if needed, 
+                // or just pass it as an arg. For now, we'll modify the handlePostProfessional to handle it or inject it into the form data.
+                // Actually, handlePostProfessional reads from formData entries. 
+                // We can append it or just let the user function handle it.
+                // Let's modify handlePostProfessional to simplify. 
+                // But since we can't easily modify the outer function from here without rewriting the whole component,
+                // we'll inject a hidden input!
+                handlePostProfessional(e, 'seller');
+              }} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                {/* Property Type Toggles */}
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '10px' }}>
+                  {['residential', 'commercial', 'industrial', 'agricultural'].map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setSellerType(type)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        border: '1px solid var(--accent-gold)',
+                        background: sellerType === type ? 'var(--accent-gold)' : 'transparent',
+                        color: sellerType === type ? 'var(--bg-primary)' : 'var(--text-secondary)',
+                        fontSize: '0.9rem',
+                        textTransform: 'capitalize',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Hidden input to pass sellerType to the handler */}
+                <input type="hidden" name="activePropertyType" value={sellerType} />
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="input-group">
                     <label>Purpose</label>
                     <select name="purpose" className="glass">
                       <option>Sale</option>
                       <option>Rent</option>
-                      <option>Security/Lease</option>
+                      <option>Lease/Collaboration</option>
                     </select>
                   </div>
                   <div className="input-group">
-                    <label>Category</label>
+                    <label>Category ({sellerType})</label>
                     <select name="category" className="glass">
-                      <option>Floor</option>
-                      <option>Whole Building</option>
-                      <option>Plot/Land</option>
-                      <option>Commercial</option>
+                      {sellerCategories[sellerType].map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -383,15 +435,22 @@ _Verified Professional Lead_ 🟢`;
                     <input name="price" type="number" placeholder="50,00,000" required />
                   </div>
                   <div className="input-group">
-                    <label>Area (Sqft)</label>
-                    <input name="area" type="number" placeholder="1200" required />
+                    <label>Area ({sellerType === 'agricultural' ? 'Acres/Bigha' : 'Sqft'})</label>
+                    <input name="area" type="text" placeholder={sellerType === 'agricultural' ? 'e.g. 2 Acres' : '1200'} required />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  <div className="input-group"><label>Beds</label><input name="beds" type="number" placeholder="3" /></div>
-                  <div className="input-group"><label>Baths</label><input name="baths" type="number" placeholder="2" /></div>
-                  <div className="input-group"><label>Floors</label><input name="totalFloors" type="number" placeholder="4" /></div>
+                  {sellerType === 'residential' && (
+                    <>
+                      <div className="input-group"><label>Beds</label><input name="beds" type="number" placeholder="3" /></div>
+                      <div className="input-group"><label>Baths</label><input name="baths" type="number" placeholder="2" /></div>
+                    </>
+                  )}
+                  <div className="input-group" style={{ gridColumn: sellerType === 'residential' ? 'auto' : '1 / -1' }}>
+                    <label>Floors / Details</label>
+                    <input name="totalFloors" type="text" placeholder={sellerType === 'residential' ? "Total Floors (e.g. 4)" : "Additional Details"} />
+                  </div>
                 </div>
 
                 <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>Post Seller Lead</button>
@@ -422,6 +481,7 @@ _Verified Professional Lead_ 🟢`;
                       <option>Residential</option>
                       <option>Commercial</option>
                       <option>Industrial</option>
+                      <option>Agricultural</option>
                     </select>
                   </div>
                 </div>
