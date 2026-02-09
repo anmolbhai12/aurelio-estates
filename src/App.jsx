@@ -36,8 +36,8 @@ function App() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isNewUser, setIsNewUser] = useState(true);
 
-  // GAS URLs
-  const WHATSAPP_PROXY_URL = 'https://script.google.com/macros/s/AKfycbxUzjYHqFUUxULp0z2wlZB_AhO57If_1guXP0IYlg0WVwdNlu0sA3tjeb3UuIDkKmt_qA/exec';
+  // GAS URLs & Bot Proxies
+  const WHATSAPP_PROXY_URL = 'https://dalaalstreetss.alwaysdata.net/send-otp';
   const SIGNUP_LOG_URL = 'https://script.google.com/macros/s/AKfycbxUzjYHqFUUxULp0z2wlZB_AhO57If_1guXP0IYlg0WVwdNlu0sA3tjeb3UuIDkKmt_qA/exec';
 
   // Animation Effects
@@ -53,47 +53,60 @@ function App() {
     }
   }, [view]);
 
-  // Power-Sync Integration (CORS-Proof)
+  // Power-Sync Integration (Direct & Redundant)
   const powerSync = (url, data) => {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'powerSyncFrame';
-    document.body.appendChild(iframe);
+    const params = new URLSearchParams(data);
+    const fullUrl = url + (url.includes('?') ? '&' : '?') + params.toString();
+    console.log('🔗 PowerSync Trigger:', fullUrl);
 
-    const form = document.createElement('form');
-    form.target = 'powerSyncFrame';
-    form.action = url;
-    form.method = 'POST';
-
-    for (const key in data) {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = data[key];
-      form.appendChild(input);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-
-    setTimeout(() => {
-      document.body.removeChild(form);
-      document.body.removeChild(iframe);
-    }, 2000);
+    // Direct Fetch (Works because Alwaysdata has CORS enabled)
+    fetch(fullUrl).catch(err => {
+      console.warn('Direct fetch failed, trying silent fallback...', err);
+      const img = new Image();
+      img.src = fullUrl;
+    });
   };
 
-  const handleSendOTP = (e) => {
+  const handleSendOTP = async (e) => {
     e.preventDefault();
     const generatedOtp = Math.floor(100000 + Math.random() * 900000);
-    setOtp(generatedOtp.toString()); // In production, this would be on the server
+    setOtp(generatedOtp.toString());
 
-    // Send via WhatsApp Proxy
-    powerSync(WHATSAPP_PROXY_URL, {
-      phone: phoneNumber,
-      message: `Your DalaalStreet verification code is: ${generatedOtp}. Welcome to the legend.`
-    });
+    // Clean number: remove non-digits
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
 
-    setIsOtpSent(true);
+    // UI Feedback
+    const btn = e.target.querySelector('button');
+    const originalText = btn.innerText;
+    btn.innerText = "⚡ Sending OTP...";
+    btn.disabled = true;
+
+    console.log('🚀 Dispatching OTP to Alwaysdata:', cleanPhone);
+
+    try {
+      const params = new URLSearchParams({
+        phone: cleanPhone,
+        message: `Your code is: ${generatedOtp}. Support: DalaalStreet`
+      });
+
+      const fullUrl = WHATSAPP_PROXY_URL + '?' + params.toString();
+      const response = await fetch(fullUrl, { method: 'GET', mode: 'cors' });
+
+      if (response.ok) {
+        console.log('✅ Alwaysdata accepted the request.');
+        setIsOtpSent(true);
+      } else {
+        const errData = await response.json();
+        alert(`❌ Error from Bot: ${errData.error || 'Unknown error'}`);
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    } catch (err) {
+      console.error('❌ Network Error:', err);
+      alert(`❌ Connection Issue: ${err.message}. Please check if https://dalaalstreetss.alwaysdata.net/status is online.`);
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
   };
 
   const handleVerifyOTP = (enteredCode) => {
@@ -115,28 +128,68 @@ function App() {
     }
   };
 
-  // Handle New Property
-  const handlePostProperty = (e) => {
+  // Handle Professional Listing (Seller/Builder)
+  const handlePostProfessional = async (e, type) => {
+    e.preventDefault();
     if (!user) {
       setView('auth');
       return;
     }
+
     const formData = new FormData(e.target);
-    const newProp = {
-      id: properties.length + 1,
-      title: formData.get('title'),
-      location: formData.get('location'),
-      price: parseInt(formData.get('price')),
-      beds: parseInt(formData.get('beds')),
-      baths: parseInt(formData.get('baths')),
-      sqft: parseInt(formData.get('sqft')),
-      type: formData.get('type'),
-      image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1350&q=80",
-      description: formData.get('description'),
-      seller: "You (Legend)"
-    };
-    setProperties([newProp, ...properties]);
-    setView('buyer');
+    const data = Object.fromEntries(formData.entries());
+
+    // UI Feedback
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.innerText = "⭐ Publishing...";
+    btn.disabled = true;
+
+    // Build WhatsApp Message
+    const msg = `🏠 *DALAALSTREET PROFESSIONAL LISTING*
+-------------------------------
+*User:* ${userName}
+*Phone:* ${phoneNumber}
+*Role:* ${type === 'seller' ? 'Seller/Owner' : 'Builder/Investor'}
+*Purpose:* ${data.purpose || data.requirement}
+*Property:* ${data.category || data.landType}
+*Area:* ${data.area} ${type === 'seller' ? 'sqft' : 'Gaj'}
+*Price/Budget:* ₹${data.price || data.budget}
+*Location:* ${data.location}
+-------------------------------
+_Verified Professional Lead_ 🟢`;
+
+    try {
+      const params = new URLSearchParams({
+        phone: phoneNumber,
+        message: msg
+      });
+      // Use the new /send-msg for custom text
+      await fetch(`https://dalaalstreetss.alwaysdata.net/send-msg?${params.toString()}`);
+
+      const newProp = {
+        id: properties.length + 1,
+        title: data.title || `${data.category} in ${data.location}`,
+        location: data.location,
+        price: parseInt(data.price || data.budget),
+        beds: parseInt(data.beds || 0),
+        baths: parseInt(data.baths || 0),
+        sqft: parseInt(data.area),
+        type: data.category || "Plot",
+        image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1350&q=80",
+        description: data.description || `Professional ${type} listing.`,
+        seller: userName || "Verified Professional"
+      };
+
+      setProperties([newProp, ...properties]);
+      alert("✅ Your professional listing is live! Check your WhatsApp for the summary.");
+      setView('buyer');
+    } catch (err) {
+      console.error(err);
+      alert("❌ Listing partially failed. Bot might be offline.");
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
   };
 
   const Nav = () => (
@@ -149,9 +202,10 @@ function App() {
           <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>DalaalStreet</h2>
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <button onClick={() => setView('buyer')} style={{ color: view === 'buyer' ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>Explore</button>
+          <button onClick={() => setView('buyer')} style={{ color: view === 'buyer' ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>Marketplace</button>
+          <button onClick={() => setView('builders')} style={{ color: view === 'builders' ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>Builders</button>
           <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
-            <Plus size={18} /> Sell Property
+            <Plus size={18} /> Post Your Property
           </button>
           <button
             onClick={() => !user && setView('auth')}
@@ -252,68 +306,112 @@ function App() {
   );
 
   const PostPropertyView = () => (
-    <div className="container" style={{ paddingTop: '120px', maxWidth: '800px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '3rem' }}>List Your Property</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Let our exclusive buyers discover your masterpiece.</p>
+    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Seller Section */}
+        <div className="animate-fade">
+          <div style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Seller</span></h2>
+            <p style={{ color: 'var(--text-secondary)' }}>List for Sale, Rent or Security</p>
+          </div>
+          <form onSubmit={(e) => handlePostProfessional(e, 'seller')} className="glass" style={{ padding: '30px', borderRadius: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group">
+                <label>Purpose</label>
+                <select name="purpose" className="glass">
+                  <option>Sale</option>
+                  <option>Rent</option>
+                  <option>Security/Lease</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Category</label>
+                <select name="category" className="glass">
+                  <option>Floor</option>
+                  <option>Whole Building</option>
+                  <option>Plot/Land</option>
+                  <option>Commercial</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Location / Society</label>
+              <input name="location" placeholder="e.g. DLF Phase 5" required />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group">
+                <label>Total Price (₹)</label>
+                <input name="price" type="number" placeholder="50,00,000" required />
+              </div>
+              <div className="input-group">
+                <label>Area (Sqft)</label>
+                <input name="area" type="number" placeholder="1200" required />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+              <div className="input-group"><label>Beds</label><input name="beds" type="number" placeholder="3" /></div>
+              <div className="input-group"><label>Baths</label><input name="baths" type="number" placeholder="2" /></div>
+              <div className="input-group"><label>Floors</label><input name="totalFloors" type="number" placeholder="4" /></div>
+            </div>
+
+            <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>Post Seller Lead</button>
+          </form>
+        </div>
+
+        {/* Builder Section */}
+        <div className="animate-fade" style={{ animationDelay: '0.2s' }}>
+          <div style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '2.5rem' }}>Professional <span className="text-gradient-gold">Builder</span></h2>
+            <p style={{ color: 'var(--text-secondary)' }}>Requirements for Purchase or Lease</p>
+          </div>
+          <form onSubmit={(e) => handlePostProfessional(e, 'builder')} className="glass" style={{ padding: '30px', borderRadius: '25px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid var(--accent-gold)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group">
+                <label>Requirement</label>
+                <select name="requirement" className="glass">
+                  <option>Purchase</option>
+                  <option>Lease</option>
+                  <option>Joint Venture</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Land Type</label>
+                <select name="landType" className="glass">
+                  <option>Residential</option>
+                  <option>Commercial</option>
+                  <option>Industrial</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Target Place / Area Name</label>
+              <input name="location" placeholder="e.g. Rohini Sector 13" required />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group">
+                <label>Area in **Gaj**</label>
+                <input name="area" type="number" placeholder="200" required />
+              </div>
+              <div className="input-group">
+                <label>Budget (₹)</label>
+                <input name="budget" type="number" placeholder="1,00,00,000" required />
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Additional Specs</label>
+              <textarea name="description" placeholder="Specify if looking for corner plot, park facing etc." rows="3"></textarea>
+            </div>
+
+            <button type="submit" className="premium-button" style={{ justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' }}>Post Builder Query</button>
+          </form>
+        </div>
       </div>
-      <form onSubmit={handlePostProperty} className="glass" style={{ padding: '40px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Property Title</label>
-            <input name="title" placeholder="e.g. Majestic Heights Villa" required />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Location</label>
-            <input name="location" placeholder="e.g. Beverly Hills, CA" required />
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Price ($)</label>
-            <input name="price" type="number" placeholder="500000" required />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Property Type</label>
-            <select name="type" className="glass" style={{ padding: '12px', borderRadius: '8px', color: 'white' }}>
-              <option>Villa</option>
-              <option>Apartment</option>
-              <option>Penthouse</option>
-              <option>House</option>
-            </select>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Area (sqft)</label>
-            <input name="sqft" type="number" placeholder="2000" required />
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Bedrooms</label>
-            <input name="beds" type="number" placeholder="3" required />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Bathrooms</label>
-            <input name="baths" type="number" placeholder="2" required />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem' }}>Description</label>
-          <textarea name="description" rows="4" placeholder="Tell us about the property's unique charm..." required></textarea>
-        </div>
-
-        <div style={{ border: '2px dashed var(--border-color)', borderRadius: '15px', padding: '40px', textAlign: 'center', cursor: 'pointer' }}>
-          <Camera size={32} color="var(--accent-gold)" style={{ marginBottom: '10px' }} />
-          <p style={{ color: 'var(--text-secondary)' }}>Click to upload property images</p>
-        </div>
-
-        <button type="submit" className="premium-button" style={{ justifyContent: 'center', marginTop: '10px' }}>
-          Submit Listing for Review
-        </button>
-      </form>
     </div>
   );
 
@@ -423,6 +521,7 @@ function App() {
 
       {view === 'landing' && <LandingView />}
       {view === 'buyer' && <BuyerView />}
+      {view === 'builders' && <BuyerView />} {/* Reusing buyer view for matching feed */}
       {view === 'seller' && <PostPropertyView />}
       {view === 'detail' && selectedProperty && <PropertyDetailView />}
 

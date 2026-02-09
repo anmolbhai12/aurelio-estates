@@ -1,130 +1,153 @@
+const express = require('express');
+const cors = require('cors');
+const QRCode = require('qrcode');
+const WhatsAppBot = require('./whatsapp');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// --- EARLY LOGGING ---
-const logFile = path.join(__dirname, 'boot.log');
-try {
-    fs.writeFileSync(logFile, `🚀 Bot entry point reached at ${new Date().toISOString()}\n`);
-    fs.appendFileSync(logFile, `📍 Port Env: ${process.env.PORT}\n`);
-    fs.appendFileSync(logFile, `📍 Dir: ${__dirname}\n`);
-} catch (e) {
-    console.error('Failed to write boot log:', e);
-}
-
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
-const express = require('express');
-const cors = require('cors');
-const pino = require('pino');
-const qrcode = require('qrcode-terminal');
-const http = require('http');
-
-console.log('🚀 DalaalStreet Bot v2.0 Starting...');
-
-// --- PORT CONFIGURATION ---
-const PORT_RANGES = [3000, 8000, 8100, 8300]; // Ports to try // Replaced DEFAULT_PORT and FALLBACK_PORTS
-
-// --- APP SETUP ---
 const app = express();
+const PORT = process.env.PORT || 8100;
+const HOST = process.env.IP || '0.0.0.0';
+const logFile = path.join(__dirname, 'boot.log');
+const messageLogs = []; // Store last 20 messages for debugging
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname)); // Serve static files from the current directory
 
-// --- BOT LOGIC ---
-let sock;
-let isConnected = false;
-let qrCode = null;
+const bot = new WhatsAppBot();
 
-async function startBot() {
-    const authFolder = path.join(__dirname, 'auth_info');
-    if (!fs.existsSync(authFolder)) fs.mkdirSync(authFolder, { recursive: true });
+console.log('🚀 Starting DalaalStreet WhatsApp Bot...');
+bot.initialize().catch(err => {
+    const msg = `❌ Initialization failed: ${err.message}`;
+    console.error(msg);
+    try { fs.appendFileSync(logFile, `${msg}\n`); } catch (e) { }
+});
 
-    const { state, saveCreds } = await useMultiFileAuthState(authFolder);
-    const { version } = await fetchLatestBaileysVersion();
-
-    sock = makeWASocket({
-        version,
-        auth: state,
-        printQRInTerminal: false,
-        logger: pino({ level: 'silent' }), // Minimal logs
-        browser: ['DalaalStreet OTP', 'Chrome', '1.0.0'],
-        markOnlineOnConnect: true
-    });
-
-    sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect, qr } = update;
-        if (qr) {
-            qrCode = qr; // Keep for API status
-            console.log('\n\n=============================================================');
-            console.log('🚨 SCAN THIS QR CODE TO LOGIN 🚨');
-            console.log('=============================================================');
-            qrcode.generate(qr, { small: true });
-            console.log('=============================================================\n\n');
-        }
-        if (connection === 'close') {
-            isConnected = false;
-            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            if (shouldReconnect) startBot();
-        } else if (connection === 'open') {
-            isConnected = true;
-            qrCode = null;
-            console.log('✅ WA Connected!');
-        }
-    });
-
-    sock.ev.on('creds.update', saveCreds);
-}
-
-// --- API ROUTES ---
-app.get('/', (req, res) => res.send('DalaalStreet Bot Online'));
-app.get('/status', (req, res) => {
+app.get('/bot', (req, res) => {
     res.json({
-        status: isConnected ? 'connected' : 'disconnected',
-        scanned: isConnected,
-        qr: qrCode
+        status: 'online',
+        service: 'DalaalStreet WhatsApp OTP Bot',
+        version: '2.5.0'
+    });
+});
+
+app.get('/status', async (req, res) => {
+    const status = bot.getStatus();
+    status.version = '2.5.0-ANTIGRAVITY';
+    status.account = 'dalaalstreetss';
+
+    if (!status.connected && status.qrCode) {
+        try {
+            const qrImage = await QRCode.toDataURL(status.qrCode);
+            return res.send(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>WhatsApp QR Code</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f2f5; }
+                        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+                        img { margin-top: 1rem; max-width: 100%; border: 1px solid #ddd; }
+                        h1 { color: #128c7e; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h1>Link WhatsApp</h1>
+                        <p>Scan this QR code with WhatsApp to connect:</p>
+                        <img src="${qrImage}" alt="QR Code" />
+                        <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">Settings > Linked Devices > Link a Device</p>
+                    </div>
+                    <script>setTimeout(() => location.reload(), 5000);</script>
+                </body>
+                </html>
+            `);
+        } catch (err) {
+            console.error('Error generating QR image:', err);
+        }
+    }
+
+    res.json(status);
+});
+
+app.get('/debug', (req, res) => {
+    res.json({
+        status: bot.getStatus(),
+        logs: messageLogs
     });
 });
 
 app.all('/send-otp', async (req, res) => {
     const phone = req.query.phone || req.body.phone;
     const message = req.query.message || req.body.message;
-
-    if (!phone || !message) return res.status(400).json({ error: 'Missing phone or message' });
-    if (!isConnected) return res.status(503).json({ error: 'Bot not connected' });
-
+    console.log(`📩 Incoming OTP request: phone=${phone}`);
     try {
-        const id = `${phone.replace(/\D/g, '')}@s.whatsapp.net`;
-        await sock.sendMessage(id, { text: message });
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (!phone || !message) {
+            return res.status(400).json({ error: 'Missing phone or message' });
+        }
+        if (!bot.isConnected) {
+            return res.status(503).json({ error: 'WhatsApp not connected. Visit /status' });
+        }
+        const result = await bot.sendMessage(phone, message);
+        console.log(`✅ Message Dispatched: id=${result.messageId} to ${phone}`);
+        messageLogs.push({
+            time: new Date().toISOString(),
+            phone,
+            message,
+            success: true,
+            id: result.messageId,
+            details: result
+        });
+        if (messageLogs.length > 20) messageLogs.shift();
+        res.json(result);
+    } catch (error) {
+        console.error(`❌ Send Error: ${error.message} for ${phone}`);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// --- SERVER START ---
-function startServer() {
-    const port = process.env.PORT || 8100;
+app.all('/send-msg', async (req, res) => {
+    const phone = req.query.phone || req.body.phone;
+    const message = req.query.message || req.body.message;
+    console.log(`📩 Incoming professional message: phone=${phone}`);
+    try {
+        if (!phone || !message) {
+            return res.status(400).json({ error: 'Missing phone or message' });
+        }
+        if (!bot.isConnected) {
+            return res.status(503).json({ error: 'WhatsApp not connected' });
+        }
+        const result = await bot.sendMessage(phone, message);
+        messageLogs.push({
+            time: new Date().toISOString(),
+            phone,
+            message: "[Professional Update]",
+            success: true,
+            id: result.messageId
+        });
+        if (messageLogs.length > 20) messageLogs.shift();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-    const server = http.createServer(app);
+app.get('/ping', (req, res) => {
+    res.send('pong');
+});
 
-    // Bind to 0.0.0.0 as per Alwaysdata requirements
-    server.listen(port, '0.0.0.0', () => {
-        const msg = `✅ Server listening on port ${port}`;
-        console.log(msg);
-        try { fs.appendFileSync(logFile, `${msg}\n`); } catch (e) { }
-        if (!sock) startBot();
-    });
+const server = http.createServer(app);
+server.listen(PORT, '::', () => {
+    const msg = `✅ Server listening on port ${PORT} (Dual-Stack)`;
+    console.log(msg);
+    try { fs.appendFileSync(logFile, `${msg}\n`); } catch (e) { }
+});
 
-    server.on('error', (err) => {
-        const msg = `❌ Server failed: ${err.message}`;
-        console.error(msg);
-        try { fs.appendFileSync(logFile, `${msg}\n`); } catch (e) { }
-    });
-
-    // Catch uncaught exceptions to log them
-    process.on('uncaughtException', (err) => {
-        try { fs.appendFileSync(logFile, `💥 Uncaught Exception: ${err.message}\n${err.stack}\n`); } catch (e) { }
-        process.exit(1);
-    });
-}
-
-startServer();
+process.on('uncaughtException', (err) => {
+    try { fs.appendFileSync(logFile, `💥 Uncaught Exception: ${err.message}\n${err.stack}\n`); } catch (e) { }
+    process.exit(1);
+});
