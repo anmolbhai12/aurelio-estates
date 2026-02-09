@@ -89,8 +89,16 @@ function App() {
     );
   };
 
-  // Auth State - Lazy Initialization for Persistence
-  const [user, setUser] = useState(null);
+  // Auth State - Bakenovation Restore (Robust)
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dalaal_user');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      localStorage.removeItem('dalaal_user');
+    }
+    return null;
+  });
 
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userName, setUserName] = useState('');
@@ -197,7 +205,17 @@ function App() {
       });
 
       const fullUrl = WHATSAPP_PROXY_URL + '?' + params.toString();
-      const response = await fetch(fullUrl, { method: 'GET', mode: 'cors' });
+
+      // Bakenovation Timeout Logic (10s)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch(fullUrl, {
+        method: 'GET',
+        mode: 'cors',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         console.log('✅ Alwaysdata accepted the request.');
@@ -210,7 +228,10 @@ function App() {
       }
     } catch (err) {
       console.error('❌ Network Error:', err);
-      showAlert(`❌ Connection Issue: ${err.message}. Please check if https://dalaalstreetss.alwaysdata.net/status is online.`);
+      const isTimeout = err.name === 'AbortError';
+      showAlert(isTimeout
+        ? "⏳ Server Timeout. Please check if the bot is online at https://dalaalstreetss.alwaysdata.net/status"
+        : `❌ Connection Issue: ${err.message}`);
       btn.innerText = originalText;
       btn.disabled = false;
     }
@@ -893,21 +914,7 @@ _Verified Professional Lead_ 🟢`;
                   </div>
                 </div>
 
-                <div style={{ textAlign: 'left' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>Email (Optional)</label>
-                  <div style={{ position: 'relative' }}>
-                    <Mail size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
-                    <input
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={{ width: '100%', marginTop: '5px', paddingLeft: '45px' }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <div style={{ textAlign: 'left' }}>
                     <label style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', marginLeft: '10px' }}>City</label>
                     <div style={{ position: 'relative' }}>
@@ -996,7 +1003,7 @@ _Verified Professional Lead_ 🟢`;
             <a href="#">{t.footer.contact}</a>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.3 (Login Flow Restricted)</span>
+            {t.footer.rights} <span style={{ opacity: 0.5 }}>v4.4 (Bakenovation Edition)</span>
           </p>
         </div>
       </footer>
