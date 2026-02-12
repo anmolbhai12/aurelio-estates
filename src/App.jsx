@@ -230,13 +230,13 @@ function App() {
 
       if (response.ok) {
         console.log('✅ Alwaysdata accepted the request.');
-        setAuthStep(2); // Move to OTP verification step
       } else {
-        const errData = await response.json();
-        showAlert(`❌ Error from Bot: ${errData.error || 'Unknown error'}`);
-        btn.innerText = originalText;
-        btn.disabled = false;
+        const errData = await response.json().catch(() => ({}));
+        console.warn('⚠️ Bot returned an error, but proceeding as it often works anyway:', errData);
       }
+
+      // Always proceed to OTP verification as requested (user says it works even with errors)
+      setAuthStep(2);
     } catch (err) {
       console.error('❌ Network Error:', err);
       const isTimeout = err.name === 'AbortError';
