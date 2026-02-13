@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tha Logo Showcase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0A1128 0%, #1a2744 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #F4E4C1, #D4AF37, #B8941E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #D4AF37;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            margin-bottom: 60px;
+            opacity: 0.9;
+        }
+
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .logo-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .logo-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(212, 175, 55, 0.5);
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .logo-card h2 {
+            font-family: 'Playfair Display', serif;
+            color: #D4AF37;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logo-display {
+            background: #0A1128;
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .logo-display.white-bg {
+            background: #ffffff;
+        }
+
+        .logo-display.dark-bg {
+            background: #000000;
+        }
+
+        .logo-display img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .logo-info {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .usage-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+
+        .usage-section h2 {
+            font-family: 'Playfair Display', serif;
+            color: #D4AF37;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .usage-item {
+            background: rgba(10, 17, 40, 0.5);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 3px solid #D4AF37;
+        }
+
+        .usage-item h3 {
+            color: #F4E4C1;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .usage-item p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .color-swatch {
+            text-align: center;
+        }
+
+        .color-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .color-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #D4AF37;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Tha Logo Collection</h1>
+        <p class="subtitle">PREMIUM PROPERTY MARKETPLACE BRANDING</p>
+
+        <div class="logo-grid">
+            <!-- Full Logo -->
+            <div class="logo-card">
+                <h2>Primary Logo</h2>
+                <div class="logo-display">
+                    <img src="logo-tha.svg" alt="Tha Logo" style="max-width: 400px;">
+                </div>
+                <div class="logo-info">
+                    <p><strong>Usage:</strong> Hero sections, splash screens, marketing materials</p>
+                    <p><strong>File:</strong> <code>logo-tha.svg</code></p>
+                </div>
+            </div>
+
+            <!-- Horizontal Logo -->
+            <div class="logo-card">
+                <h2>Horizontal Logo</h2>
+                <div class="logo-display">
+                    <img src="logo-tha-horizontal.svg" alt="Tha Horizontal Logo" style="max-width: 500px;">
+                </div>
+                <div class="logo-info">
+                    <p><strong>Usage:</strong> Headers, navigation bars, email signatures</p>
+                    <p><strong>File:</strong> <code>logo-tha-horizontal.svg</code></p>
+                </div>
+            </div>
+
+            <!-- Icon Only -->
+            <div class="logo-card">
+                <h2>Icon Mark</h2>
+                <div class="logo-display">
+                    <img src="logo-tha-icon.svg" alt="Tha Icon" style="max-width: 150px;">
+                </div>
+                <div class="logo-info">
+                    <p><strong>Usage:</strong> Favicons, app icons, social media avatars</p>
+                    <p><strong>File:</strong> <code>logo-tha-icon.svg</code></p>
+                </div>
+            </div>
+
+            <!-- On White Background -->
+            <div class="logo-card">
+                <h2>On Light Background</h2>
+                <div class="logo-display white-bg">
+                    <img src="logo-tha.svg" alt="Tha Logo on White" style="max-width: 350px;">
+                </div>
+                <div class="logo-info">
+                    <p><strong>Note:</strong> Works well on light backgrounds for print materials</p>
+                </div>
+            </div>
+
+            <!-- On Dark Background -->
+            <div class="logo-card">
+                <h2>On Dark Background</h2>
+                <div class="logo-display dark-bg">
+                    <img src="logo-tha.svg" alt="Tha Logo on Dark" style="max-width: 350px;">
+                </div>
+                <div class="logo-info">
+                    <p><strong>Note:</strong> Optimal presentation on dark backgrounds</p>
+                </div>
+            </div>
+
+            <!-- Horizontal on Dark -->
+            <div class="logo-card">
+                <h2>Header Version</h2>
+                <div class="logo-display dark-bg">
+                    <img src="logo-tha-horizontal.svg" alt="Tha Horizontal on Dark" style="max-width: 450px;">
+                </div>
+                <div class="logo-info">
+                    <p><strong>Note:</strong> Perfect for website navigation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="usage-section">
+            <h2>Brand Color Palette</h2>
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #D4AF37;"></div>
+                    <div class="color-label">
+                        <strong>Gold</strong><br>
+                        #D4AF37
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #F4E4C1;"></div>
+                    <div class="color-label">
+                        <strong>Champagne</strong><br>
+                        #F4E4C1
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #B8941E;"></div>
+                    <div class="color-label">
+                        <strong>Dark Gold</strong><br>
+                        #B8941E
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #0A1128;"></div>
+                    <div class="color-label">
+                        <strong>Navy</strong><br>
+                        #0A1128
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Guidelines -->
+        <div class="usage-section">
+            <h2>Logo Usage Guidelines</h2>
+            <div class="usage-grid">
+                <div class="usage-item">
+                    <h3>🎯 Primary Logo</h3>
+                    <p>Use the full circular logo for main branding touchpoints: landing pages, app splash screens, and
+                        premium marketing materials.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>📱 Horizontal Logo</h3>
+                    <p>Perfect for website headers, email signatures, and horizontal layouts where space is limited but
+                        brand presence is essential.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>⚡ Icon Mark</h3>
+                    <p>Use the icon-only version for favicons, app icons, social media profile pictures, and situations
+                        requiring compact branding.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>🎨 Color Variations</h3>
+                    <p>The gold gradient is the primary brand color. Maintain the navy background for optimal contrast
+                        and luxury feel.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>📏 Minimum Size</h3>
+                    <p>Never display the full logo smaller than 120px wide. For the icon, minimum 32px. This ensures
+                        readability and impact.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>🚫 Don'ts</h3>
+                    <p>Don't alter colors, stretch proportions, add effects, or place on busy backgrounds. Keep clear
+                        space around the logo.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design Philosophy -->
+        <div class="usage-section">
+            <h2>Design Philosophy</h2>
+            <div class="usage-grid">
+                <div class="usage-item">
+                    <h3>🏛️ Classic Elegance</h3>
+                    <p>The serif typography and art deco geometric elements evoke timeless luxury and architectural
+                        sophistication.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>🔑 Symbolic Meaning</h3>
+                    <p>The keyhole-door fusion represents access to exclusive properties and unlocking dream homes.</p>
+                </div>
+                <div class="usage-item">
+                    <h3>✨ Premium Feel</h3>
+                    <p>Gold gradients and refined details create an unmistakably high-end, cult-classic aesthetic.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
