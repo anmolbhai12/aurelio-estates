@@ -1143,10 +1143,9 @@ _Verified Professional Lead_ 🟢`;
                       <span>
                         I accept all{' '}
                         <a
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setView('terms');
-                          }}
+                          href="/terms.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
                           style={{ color: 'var(--accent-gold)', textDecoration: 'underline', cursor: 'pointer' }}
                         >
                           Terms and Conditions
@@ -1166,123 +1165,6 @@ _Verified Professional Lead_ 🟢`;
         </div>
       )}
 
-      {/* Terms & Conditions View */}
-      {view === 'terms' && (
-        <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px', maxWidth: '900px' }}>
-          <button onClick={() => setView('auth')} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', marginBottom: '2rem', cursor: 'pointer' }}>
-            <X size={18} /> Back to Signup
-          </button>
-
-          <div className="glass" style={{ padding: '50px', borderRadius: '30px' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--accent-gold)' }}>Terms and Conditions</h1>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Last updated: February 2026</p>
-
-            <div style={{ lineHeight: '1.8', color: 'var(--text-secondary)' }}>
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>1. Acceptance of Terms</h2>
-              <p>By accessing and using Tha ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement.</p>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>2. Platform Purpose</h2>
-              <p>Tha is a premium property marketplace that connects buyers and sellers. We provide a platform for property listings and facilitate communication between parties.</p>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>3. ⚠️ Disclaimer of Liability</h2>
-              <div style={{ background: 'rgba(255, 193, 7, 0.1)', border: '2px solid var(--accent-gold)', borderRadius: '15px', padding: '20px', marginTop: '1rem' }}>
-                <p style={{ fontWeight: 'bold', color: 'var(--accent-gold)', marginBottom: '1rem' }}>IMPORTANT NOTICE:</p>
-                <p style={{ marginBottom: '1rem' }}><strong>Tha is NOT responsible for any scams, fraudulent activities, or disputes that may occur between buyers and sellers.</strong></p>
-                <p style={{ marginBottom: '1rem' }}>We are a platform service provider only. All transactions, negotiations, and agreements are conducted directly between users. Tha does not:</p>
-                <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                  <li>Verify the authenticity of property listings</li>
-                  <li>Guarantee the accuracy of information provided by users</li>
-                  <li>Act as an intermediary in financial transactions</li>
-                  <li>Assume liability for any losses, damages, or disputes</li>
-                  <li>Conduct background checks on users</li>
-                </ul>
-              </div>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>4. User Responsibilities</h2>
-              <p>Users are solely responsible for:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>Conducting due diligence before any transaction</li>
-                <li>Verifying property ownership and legal documentation</li>
-                <li>Meeting sellers/buyers in safe, public locations</li>
-                <li>Reporting suspicious activities to appropriate authorities</li>
-                <li>Ensuring compliance with local laws and regulations</li>
-              </ul>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>5. Safety Recommendations</h2>
-              <p>We strongly recommend:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>Never transfer money before verifying property ownership</li>
-                <li>Always consult with legal professionals</li>
-                <li>Conduct physical property inspections</li>
-                <li>Use secure payment methods with proper documentation</li>
-                <li>Report any suspicious listings or users immediately</li>
-              </ul>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>6. Limitation of Liability</h2>
-              <p>To the maximum extent permitted by law, Tha shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses resulting from your use of the Platform.</p>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>7. Contact</h2>
-              <p>For questions about these Terms, please contact us through the Platform.</p>
-            </div>
-
-            <div style={{ marginTop: '3rem', padding: '20px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '15px', textAlign: 'center' }}>
-              <p style={{ color: 'var(--accent-gold)', fontWeight: 'bold' }}>By using Tha, you acknowledge that you have read, understood, and agree to these Terms and Conditions.</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Privacy Policy View */}
-      {view === 'privacy' && (
-        <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px', maxWidth: '900px' }}>
-          <button onClick={() => setView('landing')} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', marginBottom: '2rem', cursor: 'pointer' }}>
-            <X size={18} /> Back to Home
-          </button>
-
-          <div className="glass" style={{ padding: '50px', borderRadius: '30px' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--accent-gold)' }}>Privacy Policy</h1>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Last updated: February 2026</p>
-
-            <div style={{ lineHeight: '1.8', color: 'var(--text-secondary)' }}>
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>1. Information We Collect</h2>
-              <p>We collect information you provide directly to us, including:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>Name, email address, phone number</li>
-                <li>City and pincode</li>
-                <li>Property listing information</li>
-                <li>Communication data</li>
-              </ul>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>2. How We Use Your Information</h2>
-              <p>We use the information we collect to:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>Provide and maintain our services</li>
-                <li>Facilitate communication between buyers and sellers</li>
-                <li>Send you OTP verification codes</li>
-                <li>Improve our platform</li>
-              </ul>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>3. Information Sharing</h2>
-              <p>We do not sell your personal information. We may share your information:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>With other users when you post property listings</li>
-                <li>When required by law</li>
-                <li>To protect our rights and safety</li>
-              </ul>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>4. Data Security</h2>
-              <p>We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure.</p>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>5. Your Rights</h2>
-              <p>You have the right to access, update, or delete your personal information at any time.</p>
-
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem' }}>6. Contact Us</h2>
-              <p>For privacy-related questions, please contact us through the Platform.</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {isChatOpen && <ChatOverlay />}
 
       <footer style={{ background: 'var(--bg-secondary)', padding: '60px 0', marginTop: '60px', borderTop: '1px solid var(--glass-border)' }}>
@@ -1293,13 +1175,17 @@ _Verified Professional Lead_ 🟢`;
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', color: 'var(--text-muted)' }}>
             <a
-              onClick={() => setView('terms')}
+              href="/terms.html"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ cursor: 'pointer', color: 'var(--text-muted)', textDecoration: 'none' }}
             >
               {t.footer.terms}
             </a>
             <a
-              onClick={() => setView('privacy')}
+              href="/privacy.html"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ cursor: 'pointer', color: 'var(--text-muted)', textDecoration: 'none' }}
             >
               {t.footer.privacy}
