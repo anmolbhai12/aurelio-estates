@@ -413,11 +413,8 @@ _Verified Professional Lead_ 🟢`;
   const Nav = () => (
     <nav className="glass" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, padding: '1rem 0' }}>
       <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setView('landing')}>
-          <div style={{ width: '40px', height: '40px', background: 'var(--accent-gold)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <HomeIcon size={24} color="var(--bg-primary)" />
-          </div>
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--accent-gold)' }}>ਥਾਂ / Tha</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setView('landing')}>
+          <img src="/logo-tha-horizontal.svg" alt="Tha Logo" style={{ height: '50px', width: 'auto' }} />
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -979,6 +976,11 @@ _Verified Professional Lead_ 🟢`;
       {view === 'auth' && (
         <div className="container" style={{ paddingTop: '150px', display: 'flex', justifyContent: 'center' }}>
           <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
+
+            {/* Logo Header */}
+            <div style={{ marginBottom: '30px' }}>
+              <img src="/logo-tha.svg" alt="Tha" style={{ width: '120px', margin: '0 auto', display: 'block' }} />
+            </div>
 
             {/* Step 1: Phone Number Entry */}
             {authStep === 1 && (

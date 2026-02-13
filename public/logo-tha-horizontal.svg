@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200">
+  <defs>
+    <linearGradient id="goldGradientH" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4E4C1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8941E;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glowH">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Geometric Icon: Abstract Key/Door/Building -->
+  <g transform="translate(100, 100)">
+    <!-- Building/Door silhouette -->
+    <path d="M -35 -30 L -35 45 L 35 45 L 35 -30 L 18 -45 L -18 -45 Z" 
+          fill="none" 
+          stroke="url(#goldGradientH)" 
+          stroke-width="2.5" 
+          stroke-linejoin="miter"/>
+    
+    <!-- Keyhole element in center -->
+    <circle cx="0" cy="8" r="7" fill="url(#goldGradientH)"/>
+    <path d="M -3.5 15 L 3.5 15 L 5 30 L -5 30 Z" fill="url(#goldGradientH)"/>
+    
+    <!-- Art Deco accent lines -->
+    <line x1="-26" y1="-20" x2="-26" y2="35" stroke="url(#goldGradientH)" stroke-width="1.2" opacity="0.6"/>
+    <line x1="26" y1="-20" x2="26" y2="35" stroke="url(#goldGradientH)" stroke-width="1.2" opacity="0.6"/>
+    <line x1="-17" y1="-15" x2="-17" y2="35" stroke="url(#goldGradientH)" stroke-width="0.8" opacity="0.4"/>
+    <line x1="17" y1="-15" x2="17" y2="35" stroke="url(#goldGradientH)" stroke-width="0.8" opacity="0.4"/>
+  </g>
+  
+  <!-- Vertical divider -->
+  <line x1="180" y1="60" x2="180" y2="140" stroke="#D4AF37" stroke-width="1" opacity="0.3"/>
+  
+  <!-- "Tha" Text -->
+  <text x="240" y="115" 
+        font-family="'Playfair Display', 'Cormorant', Georgia, serif" 
+        font-size="64" 
+        font-weight="600"
+        fill="url(#goldGradientH)" 
+        text-anchor="start"
+        letter-spacing="6"
+        filter="url(#glowH)">Tha</text>
+  
+  <!-- Tagline -->
+  <text x="240" y="138" 
+        font-family="'Montserrat', 'Futura', Arial, sans-serif" 
+        font-size="10" 
+        font-weight="300"
+        fill="#D4AF37" 
+        text-anchor="start"
+        letter-spacing="3.5"
+        opacity="0.85">PREMIUM PROPERTY MARKETPLACE</text>
+</svg>

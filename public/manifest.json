@@ -1,0 +1,24 @@
+{
+    "name": "Tha - Premium Property Marketplace",
+    "short_name": "Tha",
+    "description": "Discover your masterpiece home with Tha's curated premium real estate listings",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0A1128",
+    "theme_color": "#D4AF37",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/logo-tha-icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/logo-tha.svg",
+            "sizes": "400x400",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ]
+}
