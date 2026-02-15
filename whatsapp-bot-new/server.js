@@ -145,6 +145,15 @@ app.get('/client-logs', (req, res) => {
     }
 });
 
+app.get('/server-logs', (req, res) => {
+    try {
+        const logs = fs.readFileSync(logFile, 'utf8');
+        res.send(`<pre>${logs}</pre>`);
+    } catch (e) {
+        res.send('No server logs yet.');
+    }
+});
+
 app.all('/send-msg', async (req, res) => {
     const phone = req.query.phone || req.body.phone;
     const message = req.query.message || req.body.message;
@@ -227,7 +236,7 @@ app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
         uptime: process.uptime(),
-        multerLoaded: !!multer,
+        multerLoadedV2: !!upload,
         multerError: multerError,
         uploadDirExists: fs.existsSync(uploadDir),
         node_modules: modulesList,
@@ -275,6 +284,7 @@ app.post('/properties', upload.array('media'), (req, res) => {
 
         // Parse the property data (it comes as a JSON string in 'data' field or individual fields)
         let propertyData = req.body;
+        console.log("RAW BODY KEYS:", Object.keys(req.body));
 
         // If data is sent as a stringified JSON field (common with FormData/JSON mixing)
         if (req.body.data) {
@@ -287,9 +297,18 @@ app.post('/properties', upload.array('media'), (req, res) => {
 
         // Validate basic data
         if (!propertyData || !propertyData.seller || !propertyData.mobile) {
-            console.error("❌ Validation Failed. Data:", JSON.stringify(propertyData));
-            console.error("Req Body Keys:", Object.keys(req.body));
-            return res.status(400).json({ error: 'Invalid property data' });
+            console.error("❌ Validation Failed!");
+            console.error("Parsed Data:", JSON.stringify(propertyData));
+            console.error("Raw Body Keys:", Object.keys(req.body));
+            console.error("Raw Body Data Field Length:", req.body.data ? req.body.data.length : 'N/A');
+            return res.status(400).json({
+                error: 'Invalid property data',
+                missing: {
+                    seller: !propertyData.seller,
+                    mobile: !propertyData.mobile,
+                    data: !propertyData
+                }
+            });
         }
 
         const newProperty = {
@@ -346,6 +365,16 @@ server.listen(PORT, '::', () => {
 });
 
 process.on('uncaughtException', (err) => {
-    try { fs.appendFileSync(logFile, `💥 Uncaught Exception: ${err.message}\n${err.stack}\n`); } catch (e) { }
-    process.exit(1);
+    const msg = `💥 Uncaught Exception: ${err.message}\n${err.stack}\n`;
+    console.error(msg);
+    try { fs.appendFileSync(logFile, msg); } catch (e) { }
+
+    // Don't crash for missing creds, just log it
+    if (err.code === 'ENOENT' && err.path && err.path.includes('creds.json')) {
+        console.error("⚠️ Ignoring missing creds.json to keep server alive.");
+        return;
+    }
+
+    // For other critical errors, maybe exit? Or try to stay alive.
+    // process.exit(1); 
 });

@@ -122,6 +122,14 @@ function App() {
   const [tempName, setTempName] = useState('');
   const [isChoosingLanguage, setIsChoosingLanguage] = useState(false);
 
+  // Sync state with user object (Fixes 400 error on refresh)
+  useEffect(() => {
+    if (user) {
+      if (!userName && user.name) setUserName(user.name);
+      if (!phoneNumber && user.phone) setPhoneNumber(user.phone);
+    }
+  }, [user]);
+
   // GAS URLs & Bot Proxies
   const WHATSAPP_PROXY_URL = 'https://dalaalstreetss.alwaysdata.net/send-otp';
   const SIGNUP_LOG_URL = 'https://script.google.com/macros/s/AKfycbxUzjYHqFUUxULp0z2wlZB_AhO57If_1guXP0IYlg0WVwdNlu0sA3tjeb3UuIDkKmt_qA/exec';
@@ -387,8 +395,8 @@ function App() {
     // Build WhatsApp Message
     const msg = `🏠 *THA EXCLUSIVE LISTING*
 -------------------------------
-*User:* ${userName}
-*Phone:* ${phoneNumber}
+*User:* ${user.name}
+*Phone:* ${user.phone}
 *Role:* ${type === 'seller' ? 'Seller/Owner' : 'Builder/Investor'}
 ${data.activePropertyType ? `*Type:* ${data.activePropertyType.toUpperCase()}` : ''}
 *Purpose:* ${data.purpose || data.requirement}
@@ -403,7 +411,7 @@ _Verified Professional Lead_ 🟢`;
 
     try {
       const params = new URLSearchParams({
-        phone: phoneNumber,
+        phone: user.phone,
         message: msg
       });
       // Use the new /send-msg for custom text
@@ -451,8 +459,8 @@ _Verified Professional Lead_ 🟢`;
         baths: parseInt(data.baths || 0),
         floors: data.floors,
         description: data.description || `Professional listing.`,
-        seller: userName || "Verified Professional",
-        mobile: phoneNumber,
+        seller: user.name || "Verified Professional",
+        mobile: user.phone,
         verified: true,
         sold: false
       };
@@ -489,8 +497,15 @@ _Verified Professional Lead_ 🟢`;
             setView('buyer');
             resolve(savedProp);
           } else {
-            console.error("Upload failed:", xhr.statusText);
-            reject(new Error(xhr.statusText));
+            console.error("Upload failed:", xhr.status, xhr.statusText);
+            let detail = "";
+            try {
+              const errJson = JSON.parse(xhr.responseText);
+              detail = `\nMissing: ${JSON.stringify(errJson.missing || errJson.error)}`;
+            } catch (e) {
+              detail = `\nBody: ${xhr.responseText.substring(0, 100)}`;
+            }
+            reject(new Error(`Server Error (${xhr.status}): ${xhr.statusText || 'Failed'}${detail}`));
           }
         };
 
@@ -503,7 +518,8 @@ _Verified Professional Lead_ 🟢`;
       });
     } catch (err) {
       console.error(err);
-      showAlert(t.alerts.listingFailed);
+      const errorMsg = err.message || "Unknown error";
+      showAlert(`${t.alerts.listingFailed}\nReason: ${errorMsg}`);
       btn.innerText = originalText;
       btn.disabled = false;
     }
@@ -1494,11 +1510,10 @@ _Verified Professional Lead_ 🟢`;
             </span>
           </div>
           <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            {t.footer.rights} <span style={{ opacity: 0.5 }}>v5.0 (Global Launch)</span>
+            {t.footer.rights} <span style={{ opacity: 0.5 }}>v5.0 (Global Launch) • v4.0.4 (Active Sync)</span>
           </p>
         </div>
       </footer>
-
       {/* FOX - THE CLEVER AI BOT */}
       <FoxBot
         properties={properties}

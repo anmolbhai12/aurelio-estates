@@ -1,29 +1,29 @@
 import ftplib
-import os
+import time
 
 HOST = 'ftp-dalaalstreetss.alwaysdata.net'
 USER = 'dalaalstreetss'
 PASS = 'dalaalstreets123'
-REMOTE_DIR = 'www'
-LOCAL_FILE = 'whatsapp-bot-new/server.js'
 
-def upload_server():
+def nuke_restart():
     print(f"Connecting to {HOST}...")
     try:
         ftp = ftplib.FTP_TLS(HOST)
         ftp.login(USER, PASS)
         ftp.prot_p()
         
-        ftp.cwd(REMOTE_DIR)
+        print("Renaming www to www_nuke...")
+        ftp.rename('www', 'www_nuke')
         
-        print("Uploading server.js...")
-        with open(LOCAL_FILE, 'rb') as f:
-            ftp.storbinary('STOR server.js', f)
-            
-        print("Upload complete.")
+        time.sleep(10)
+        
+        print("Renaming back to www...")
+        ftp.rename('www_nuke', 'www')
+        
         ftp.quit()
+        print("Nuke restart complete.")
     except Exception as e:
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    upload_server()
+    nuke_restart()

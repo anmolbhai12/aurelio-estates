@@ -1,29 +1,28 @@
 import ftplib
-import os
 
 HOST = 'ftp-dalaalstreetss.alwaysdata.net'
 USER = 'dalaalstreetss'
 PASS = 'dalaalstreets123'
-REMOTE_DIR = 'www'
-LOCAL_FILE = 'whatsapp-bot-new/server.js'
 
-def upload_server():
+def fix_auth_folder():
     print(f"Connecting to {HOST}...")
     try:
         ftp = ftplib.FTP_TLS(HOST)
         ftp.login(USER, PASS)
         ftp.prot_p()
         
-        ftp.cwd(REMOTE_DIR)
+        ftp.cwd('www')
         
-        print("Uploading server.js...")
-        with open(LOCAL_FILE, 'rb') as f:
-            ftp.storbinary('STOR server.js', f)
+        try:
+            ftp.cwd('auth_info')
+            print("auth_info directory exists.")
+        except:
+            print("Creating auth_info directory...")
+            ftp.mkd('auth_info')
             
-        print("Upload complete.")
         ftp.quit()
     except Exception as e:
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    upload_server()
+    fix_auth_folder()

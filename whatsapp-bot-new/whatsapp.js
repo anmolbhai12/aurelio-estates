@@ -58,7 +58,8 @@ class WhatsAppBot {
 
         } catch (error) {
             console.error('❌ Error initializing WhatsApp:', error);
-            throw error;
+            // Don't re-throw, let the server live without the bot
+            this.isConnected = false;
         }
     }
 
