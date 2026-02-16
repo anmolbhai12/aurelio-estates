@@ -859,7 +859,7 @@ _Verified Professional Lead_ 🟢`;
           </div>
         )
         }
-        <div className="hero-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url("https://images.unsplash.com/photo-1600585154340-be6199f7a096?auto=format&fit=crop&w=1920&q=80")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="hero-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', backgroundColor: '#000', background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url("https://images.unsplash.com/photo-1600585154340-be6199f7a096?auto=format&fit=crop&w=1920&q=80")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
           <div className="container hero-content">
             <div className="animate-fade">
               <span className="badge">{t.hero.badge}</span>
