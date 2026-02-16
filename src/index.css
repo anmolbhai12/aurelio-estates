@@ -37,6 +37,7 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   overflow-x: hidden;
+  width: 100%;
 }
 
 h1,
@@ -81,6 +82,8 @@ textarea:focus {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
+  width: 100%;
+  position: relative;
 }
 
 .glass {
@@ -137,38 +140,6 @@ textarea:focus {
   border: 1px solid rgba(197, 160, 89, 0.2);
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade {
-  animation: fadeIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-.text-gradient-gold {
-  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 50%, #fbf5b7 55%, #aa771c 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  background-size: 200% auto;
-  animation: shine 6s linear infinite;
-}
-
-@keyframes shine {
-  to {
-    background-position: 200% center;
-  }
-}
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -187,275 +158,202 @@ textarea:focus {
   background: var(--accent-gold);
 }
 
-/* Professional Forms */
-.input-group {
+/* --- ROUND 2 RESPONSIVENESS --- */
+
+/* Base Layout Classes */
+.property-card-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border-radius: 25px;
+  overflow: hidden;
+}
+
+.property-card-image-box {
+  width: 350px;
+  min-width: 350px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.property-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 40px;
+  align-items: start;
+}
+
+.property-detail-media {
+  height: 500px;
+  width: 100%;
+  position: relative;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.nav-search-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  flex: 1;
+  max-width: 600px;
+  margin: 0 20px;
 }
 
-.input-group label {
-  color: var(--accent-gold);
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-left: 5px;
+/* Desktop Hover Effects */
+.menu-item-hover:hover {
+  background: rgba(212, 175, 55, 0.1) !important;
+  color: var(--accent-gold) !important;
+  padding-left: 15px !important;
 }
 
-.input-group select {
-  width: 100%;
-}
-
-/* Mobile Optimizations */
-@media (max-width: 768px) {
-  .container {
-    padding: 0 0.75rem;
+/* Tablet Optimizations (Under 1024px) */
+@media (max-width: 1024px) {
+  .property-detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 30px;
   }
 
-  /* Navigation Mobile Redesign - Professional & Clean */
+  .property-card-container {
+    flex-direction: column;
+  }
+
+  .property-card-image-box {
+    width: 100%;
+    min-width: 100%;
+    height: 300px;
+  }
+}
+
+/* Mobile Optimizations (Under 768px) */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem !important;
+  }
+
   nav {
-    padding: 4px 0 !important;
+    padding: 6px 0 !important;
   }
 
   nav .container {
-    gap: 4px !important;
+    gap: 8px !important;
     flex-wrap: nowrap !important;
-    justify-content: space-between !important;
   }
 
-  /* Compact Logo */
-  nav img {
-    height: 30px !important;
-    width: auto !important;
-  }
-
-  /* Navigation Right Side - Stack vertically on very small screens */
-  nav>div:last-child {
-    gap: 6px !important;
-  }
-
-  /* Marketplace Link - Keep visible but smaller */
-  nav a[style*="cursor: pointer"] {
-    font-size: 0.7rem !important;
-    padding: 6px 8px !important;
-    white-space: nowrap;
-  }
-
-  /* Post Property Button - More compact */
-  nav .premium-button {
-    padding: 6px 10px !important;
-    font-size: 0.7rem !important;
-    gap: 3px !important;
-  }
-
-  nav .premium-button svg {
-    width: 14px !important;
-    height: 14px !important;
-  }
-
-  /* User Profile - Compact */
-  nav [style*="rgba(255,215,0"] {
-    padding: 5px 8px !important;
-    gap: 4px !important;
-  }
-
-  nav [style*="rgba(255,215,0"] span {
-    font-size: 0.7rem !important;
-    max-width: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  nav [style*="rgba(255,215,0"] svg {
-    width: 16px !important;
-    height: 16px !important;
-  }
-
-  /* Login Button - Compact */
-  nav button[style*="var(--text-secondary)"] svg {
-    width: 18px !important;
-    height: 18px !important;
-  }
-
-  /* Navigation Search Bar - Mobile */
   .nav-search-container {
     margin: 0 5px !important;
     max-width: none !important;
   }
 
-  nav input[type="text"] {
-    font-size: 0.7rem !important;
-    padding: 6px 10px 6px 30px !important;
-    height: 32px;
+  .nav-search-container input {
+    padding-left: 40px !important;
+    font-size: 0.85rem !important;
+    height: 36px;
   }
 
-  nav input[type="text"]+svg {
-    left: 8px !important;
-    width: 14px !important;
-    height: 14px !important;
+  .nav-search-container svg {
+    left: 12px !important;
+    width: 16px !important;
   }
 
   .nav-buttons-container {
-    gap: 5px !important;
+    gap: 8px !important;
+  }
+
+  .nav-buttons-container .premium-button {
+    padding: 8px 12px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .amenities-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   h1 {
-    font-size: 2rem !important;
-    line-height: 1.2 !important;
+    font-size: 2.2rem !important;
   }
 
   h2 {
-    font-size: 1.5rem !important;
+    font-size: 1.6rem !important;
   }
 
-  h3 {
-    font-size: 1.1rem !important;
-  }
-
-  /* Nav responsiveness */
-  nav {
-    padding: 12px 0 !important;
-  }
-
-  nav .container {
-    gap: 8px !important;
-    flex-wrap: nowrap !important;
-  }
-
-  nav h2 {
-    display: none;
-  }
-
-  nav a,
-  nav button {
-    gap: 4px !important;
-    padding: 6px 10px !important;
-    font-size: 0.75rem !important;
-    white-space: nowrap;
-  }
-
-  .premium-button {
-    padding: 10px 16px !important;
-    font-size: 0.85rem !important;
-  }
-
-  .secondary-button {
-    padding: 8px 14px !important;
-    font-size: 0.8rem !important;
-  }
-
-  /* Glass cards */
-  .glass {
-    border-radius: 12px !important;
-  }
-
-  /* Input fields */
-  input,
-  textarea,
-  select {
-    font-size: 16px !important;
-    /* Prevents zoom on iOS */
-    padding: 12px 14px !important;
-  }
-
-  /* Badge */
-  .badge {
-    font-size: 0.65rem !important;
-    padding: 4px 8px !important;
-  }
-
-  /* Property Cards Mobile Optimization */
-  .property-card {
-    min-height: 130px !important;
-  }
-
-  .property-card-image {
-    width: 100px !important;
-    min-width: 100px !important;
-  }
-
-  .property-card-content {
-    padding: 10px !important;
-  }
-
-  .property-card-title {
-    font-size: 0.95rem !important;
-    margin-bottom: 6px !important;
-  }
-
-  .property-card-price {
-    font-size: 1.05rem !important;
-  }
-
-  .property-card-details {
-    font-size: 0.7rem !important;
-    gap: 8px !important;
-  }
-
-  /* Responsive Grid Fixes */
-  .responsive-grid {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
-  }
-
-  .mobile-hide {
+  .mobile-hide-text {
     display: none !important;
   }
 }
 
-/* Extra Small Screens - Phones under 400px */
-@media (max-width: 400px) {
-
-  /* Even more compact navigation */
+/* Small Phones (Under 480px) */
+@media (max-width: 480px) {
   nav img {
-    height: 30px !important;
+    height: 35px !important;
   }
 
-  nav a[style*="cursor: pointer"] {
-    font-size: 0.65rem !important;
-    padding: 5px 6px !important;
+  .nav-search-container {
+    flex: 2 !important;
   }
 
-  nav .premium-button {
-    padding: 5px 8px !important;
-    font-size: 0.65rem !important;
+  .nav-buttons-container {
+    gap: 4px !important;
   }
 
-  nav [style*="rgba(255,215,0"] span {
-    max-width: 40px;
-    font-size: 0.6rem !important;
+  .nav-search-container input {
+    font-size: 0.8rem !important;
+    padding-left: 32px !important;
   }
 
-  /* Property cards even more compact */
-  .property-card {
-    min-height: 110px !important;
-  }
-
-  .property-card-image {
-    width: 90px !important;
-    min-width: 90px !important;
-  }
-
-  .property-card-content {
-    padding: 8px !important;
-  }
-
-  .property-card-title {
-    font-size: 0.85rem !important;
-  }
-
-  .property-card-price {
-    font-size: 0.95rem !important;
+  .nav-search-container svg {
+    left: 8px !important;
+    width: 14px !important;
   }
 }
 
-/* Profile Menu Utilities */
-.menu-item-hover {
-  transition: all 0.3s ease !important;
+/* Final Global Fixes */
+html,
+body,
+#root,
+.App {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+  width: 100% !important;
 }
 
-.menu-item-hover:hover {
-  background: rgba(212, 175, 55, 0.1) !important;
-  color: var(--accent-gold) !important;
-  padding-left: 15px !important;
+* {
+  box-sizing: border-box !important;
+}
+
+/* Fix for search bar typing behind text or appearing transparent */
+input[type="text"] {
+  background-color: var(--bg-tertiary) !important;
+  color: #ffffff !important;
+  position: relative;
+  z-index: 5;
+  opacity: 1 !important;
+}
+
+/* Placeholder fix */
+::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Additional Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade {
+  animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
