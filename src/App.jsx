@@ -85,7 +85,7 @@ const Nav = ({
 
         {/* Quick Filters - Always visible in Buyer view or when searching */}
         {(isSearchActive || searchQuery || view === 'buyer') && (
-          <div className="animate-fade" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="animate-fade filter-scroll-container">
             <select
               className="glass"
               style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
@@ -2259,7 +2259,7 @@ _Verified Professional Lead_ 🟢`;
               </span>
             </div>
             <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              {t.footer.rights} <span>v5.2 (Layout Fix - Round 5)</span>
+              {t.footer.rights} <span>v5.3 (Final Fix - Round 7)</span>
             </p>
           </div>
         </footer>
