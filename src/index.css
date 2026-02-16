@@ -211,54 +211,70 @@ textarea:focus {
     padding: 0 0.75rem;
   }
 
-  /* Navigation Mobile Fixes */
+  /* Navigation Mobile Redesign - Professional & Clean */
   nav {
-    padding: 10px 0 !important;
+    padding: 8px 0 !important;
   }
 
   nav .container {
-    gap: 6px !important;
+    gap: 8px !important;
     flex-wrap: nowrap !important;
+    justify-content: space-between !important;
   }
 
-  /* Hide logo text, keep icon only */
+  /* Compact Logo */
   nav img {
-    height: 40px !important;
-    max-width: 80px !important;
+    height: 35px !important;
+    width: auto !important;
   }
 
-  /* Hide "Marketplace" text on very small screens */
-  nav a {
-    font-size: 0 !important;
-    padding: 8px !important;
-    min-width: auto !important;
+  /* Navigation Right Side - Stack vertically on very small screens */
+  nav>div:last-child {
+    gap: 6px !important;
   }
 
-  nav a::before {
-    content: "🏠";
-    font-size: 1.2rem;
-  }
-
-  /* Compact Post Button */
-  nav .premium-button {
-    padding: 8px 12px !important;
-    font-size: 0.75rem !important;
-    gap: 4px !important;
+  /* Marketplace Link - Keep visible but smaller */
+  nav a[style*="cursor: pointer"] {
+    font-size: 0.7rem !important;
+    padding: 6px 8px !important;
     white-space: nowrap;
   }
 
-  /* User Profile Compact */
-  nav [style*="rgba(255,215,0"] {
+  /* Post Property Button - More compact */
+  nav .premium-button {
     padding: 6px 10px !important;
-    gap: 6px !important;
+    font-size: 0.7rem !important;
+    gap: 3px !important;
+  }
+
+  nav .premium-button svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* User Profile - Compact */
+  nav [style*="rgba(255,215,0"] {
+    padding: 5px 8px !important;
+    gap: 4px !important;
   }
 
   nav [style*="rgba(255,215,0"] span {
-    font-size: 0.8rem !important;
-    max-width: 80px;
+    font-size: 0.7rem !important;
+    max-width: 60px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  nav [style*="rgba(255,215,0"] svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* Login Button - Compact */
+  nav button[style*="var(--text-secondary)"] svg {
+    width: 18px !important;
+    height: 18px !important;
   }
 
   h1 {
@@ -352,6 +368,51 @@ textarea:focus {
   .property-card-details {
     font-size: 0.7rem !important;
     gap: 8px !important;
+  }
+}
+
+/* Extra Small Screens - Phones under 400px */
+@media (max-width: 400px) {
+
+  /* Even more compact navigation */
+  nav img {
+    height: 30px !important;
+  }
+
+  nav a[style*="cursor: pointer"] {
+    font-size: 0.65rem !important;
+    padding: 5px 6px !important;
+  }
+
+  nav .premium-button {
+    padding: 5px 8px !important;
+    font-size: 0.65rem !important;
+  }
+
+  nav [style*="rgba(255,215,0"] span {
+    max-width: 50px;
+  }
+
+  /* Property cards even more compact */
+  .property-card {
+    min-height: 110px !important;
+  }
+
+  .property-card-image {
+    width: 90px !important;
+    min-width: 90px !important;
+  }
+
+  .property-card-content {
+    padding: 8px !important;
+  }
+
+  .property-card-title {
+    font-size: 0.85rem !important;
+  }
+
+  .property-card-price {
+    font-size: 0.95rem !important;
   }
 }
 
