@@ -942,7 +942,6 @@ _Verified Professional Lead_ 🟢`;
   );
 
   const PostPropertyView = () => {
-    const [activeTab, setActiveTab] = useState('seller');
     const [sellerType, setSellerType] = useState('residential');
     const [previewMedia, setPreviewMedia] = useState([]); // Array of { type, url }
 
@@ -985,243 +984,154 @@ _Verified Professional Lead_ 🟢`;
       <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 
-          {/* Main Role Switcher */}
-          <div className="glass" style={{ display: 'flex', padding: '5px', borderRadius: '50px', marginBottom: '30px', maxWidth: '400px', margin: '0 auto 30px' }}>
-            <button
-              onClick={() => setActiveTab('seller')}
-              style={{
-                flex: 1,
-                padding: '12px 20px',
-                borderRadius: '40px',
-                background: activeTab === 'seller' ? 'var(--accent-gold)' : 'transparent',
-                color: activeTab === 'seller' ? 'var(--bg-primary)' : 'var(--text-secondary)',
-                fontWeight: activeTab === 'seller' ? '700' : '500',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {t.seller.title.split(' ')[1]}
-            </button>
-            <button
-              onClick={() => setActiveTab('builder')}
-              style={{
-                flex: 1,
-                padding: '12px 20px',
-                borderRadius: '40px',
-                background: activeTab === 'builder' ? 'var(--accent-gold)' : 'transparent',
-                color: activeTab === 'builder' ? 'var(--bg-primary)' : 'var(--text-secondary)',
-                fontWeight: activeTab === 'builder' ? '700' : '500',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {t.seller.builderTitle.split(' ')[1]}
-            </button>
-          </div>
+          <div className="animate-fade">
+            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2.5rem' }}>{t.seller.title.split(' ')[0]} <span className="text-gradient-gold">{t.seller.title.split(' ')[1]}</span></h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t.seller.subtitle}</p>
+            </div>
 
-          {/* Seller Section */}
-          {activeTab === 'seller' && (
-            <div className="animate-fade">
-              <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '2.5rem' }}>{t.seller.title.split(' ')[0]} <span className="text-gradient-gold">{t.seller.title.split(' ')[1]}</span></h2>
-                <p style={{ color: 'var(--text-secondary)' }}>{t.seller.subtitle}</p>
-              </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handlePostProfessional(e, 'seller', previewMedia);
+            }} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handlePostProfessional(e, 'seller', previewMedia);
-              }} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Multi-Media Upload Section */}
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '10px', color: 'var(--accent-gold)' }}>Property Photos & Videos</label>
 
-                {/* Multi-Media Upload Section */}
-                <div style={{ marginBottom: '10px' }}>
-                  <label style={{ display: 'block', marginBottom: '10px', color: 'var(--accent-gold)' }}>Property Photos & Videos</label>
-
-                  {/* Gallery Preview */}
-                  {previewMedia.length > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      gap: '10px',
-                      overflowX: 'auto',
-                      paddingBottom: '10px',
-                      marginBottom: '10px'
-                    }}>
-                      {previewMedia.map((media, index) => (
-                        <div key={index} style={{ position: 'relative', flex: '0 0 100px', height: '100px', borderRadius: '10px', overflow: 'hidden' }}>
-                          {media.type === 'video' ? (
-                            <video
-                              src={media.url}
-                              controls
-                              playsInline
-                              preload="metadata"
-                              style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
-                            />
-                          ) : (
-                            <img src={media.url} alt={`preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeMedia(index)}
-                            style={{
-                              position: 'absolute', top: '5px', right: '5px',
-                              background: 'rgba(0,0,0,0.7)', color: 'white',
-                              border: 'none', borderRadius: '50%', width: '20px', height: '20px',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                      <div
-                        onClick={() => document.getElementById('prop-media-input').click()}
-                        style={{
-                          flex: '0 0 100px', height: '100px', borderRadius: '10px',
-                          border: '1px dashed var(--text-secondary)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          cursor: 'pointer', color: 'var(--text-secondary)'
-                        }}
-                      >
-                        <Plus size={24} />
+                {/* Gallery Preview */}
+                {previewMedia.length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    overflowX: 'auto',
+                    paddingBottom: '10px',
+                    marginBottom: '10px'
+                  }}>
+                    {previewMedia.map((media, index) => (
+                      <div key={index} style={{ position: 'relative', flex: '0 0 100px', height: '100px', borderRadius: '10px', overflow: 'hidden' }}>
+                        {media.type === 'video' ? (
+                          <video
+                            src={media.url}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
+                          />
+                        ) : (
+                          <img src={media.url} alt={`preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(index)}
+                          style={{
+                            position: 'absolute', top: '5px', right: '5px',
+                            background: 'rgba(0,0,0,0.7)', color: 'white',
+                            border: 'none', borderRadius: '50%', width: '20px', height: '20px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                          }}
+                        >
+                          ×
+                        </button>
                       </div>
-                    </div>
-                  )}
-
-                  {!previewMedia.length && (
+                    ))}
                     <div
                       onClick={() => document.getElementById('prop-media-input').click()}
                       style={{
-                        height: '150px',
-                        borderRadius: '20px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '2px dashed var(--glass-border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer'
+                        flex: '0 0 100px', height: '100px', borderRadius: '10px',
+                        border: '1px dashed var(--text-secondary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', color: 'var(--text-secondary)'
                       }}
                     >
-                      <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                        <Camera size={30} style={{ marginBottom: '10px', opacity: 0.7 }} />
-                        <p>Upload Photos & Videos</p>
-                      </div>
+                      <Plus size={24} />
                     </div>
-                  )}
-
-                  <input
-                    id="prop-media-input"
-                    type="file"
-                    name="propertyMedia"
-                    accept="image/*,video/*"
-                    multiple
-                    onChange={handleMediaChange}
-                    style={{ display: 'none' }}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="input-group">
-                    <label>{t.seller.purpose}</label>
-                    <select name="purpose" className="glass">
-                      <option>{t.filters.forSale}</option>
-                      <option>{t.filters.forRent}</option>
-                      <option>{t.filters.lease}</option>
-                    </select>
-                  </div>
-                  <div className="input-group">
-                    <label>{t.seller.category}</label>
-                    <select name="category" className="glass">
-                      {sellerCategories.residential.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="input-group">
-                    <label>{t.seller.location}</label>
-                    <input name="location" placeholder="e.g. DLF Phase 5" required />
-                  </div>
-                  <div className="input-group">
-                    <label>{t.seller.price}</label>
-                    <input name="price" type="number" placeholder="50,00,000" required />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="input-group">
-                    <label>{sellerType === 'agricultural' ? t.seller.areaAcres : t.seller.areaSqft}</label>
-                    <input name="area" type="text" placeholder={sellerType === 'agricultural' ? 'e.g. 2 Acres' : '1200'} required />
-                  </div>
-                  <div className="input-group">
-                    <label>{t.seller.floors}</label>
-                    <input name="totalFloors" type="text" placeholder={sellerType === 'residential' ? "Total Floors (e.g. 4)" : "Additional Details"} />
-                  </div>
-                </div>
-
-                {sellerType === 'residential' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                    <div className="input-group"><label>{t.seller.beds}</label><input name="beds" type="number" placeholder="3" /></div>
-                    <div className="input-group"><label>{t.seller.baths}</label><input name="baths" type="number" placeholder="2" /></div>
                   </div>
                 )}
 
-                <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>{t.seller.postLead}</button>
-              </form>
-            </div>
-          )}
+                {!previewMedia.length && (
+                  <div
+                    onClick={() => document.getElementById('prop-media-input').click()}
+                    style={{
+                      height: '150px',
+                      borderRadius: '20px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '2px dashed var(--glass-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                      <Camera size={30} style={{ marginBottom: '10px', opacity: 0.7 }} />
+                      <p>Upload Photos & Videos</p>
+                    </div>
+                  </div>
+                )}
 
-          {/* Builder Section */}
-          {activeTab === 'builder' && (
-            <div className="animate-fade">
-              <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '2.5rem' }}>{t.seller.builderTitle.split(' ')[0]} <span className="text-gradient-gold">{t.seller.builderTitle.split(' ')[1]}</span></h2>
-                <p style={{ color: 'var(--text-secondary)' }}>{t.seller.builderSubtitle}</p>
+                <input
+                  id="prop-media-input"
+                  type="file"
+                  name="propertyMedia"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleMediaChange}
+                  style={{ display: 'none' }}
+                />
               </div>
-              <form onSubmit={(e) => handlePostProfessional(e, 'builder')} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid var(--accent-gold)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="input-group">
-                    <label>{t.seller.requirement}</label>
-                    <select name="requirement" className="glass">
-                      <option>{t.filters.forSale.split(' ')[1]}</option>
-                      <option>{t.filters.lease}</option>
-                      <option>Joint Venture</option>
-                    </select>
-                  </div>
-                  <div className="input-group">
-                    <label>{t.seller.landType}</label>
-                    <select name="landType" className="glass">
-                      <option>{t.filters.residential}</option>
-                      <option>{t.filters.commercial}</option>
-                      <option>{t.filters.industrial}</option>
-                      <option>{t.filters.agricultural}</option>
-                    </select>
-                  </div>
-                </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div className="input-group">
-                  <label>{t.seller.targetPlace}</label>
-                  <input name="location" placeholder="e.g. Rohini Sector 13" required />
+                  <label>{t.seller.purpose}</label>
+                  <select name="purpose" className="glass">
+                    <option>{t.filters.forSale}</option>
+                    <option>{t.filters.forRent}</option>
+                    <option>{t.filters.lease}</option>
+                  </select>
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="input-group">
-                    <label>{t.seller.areaGaj.replace('**', '').replace('**', '')}</label>
-                    <input name="area" type="number" placeholder="200" required />
-                  </div>
-                  <div className="input-group">
-                    <label>{t.seller.budget}</label>
-                    <input name="budget" type="number" placeholder="1,00,00,000" required />
-                  </div>
-                </div>
-
                 <div className="input-group">
-                  <label>{t.seller.additionalSpecs}</label>
-                  <textarea name="description" placeholder={t.seller.specsPlaceholder} rows="3"></textarea>
+                  <label>{t.seller.category}</label>
+                  <select name="category" className="glass">
+                    {sellerCategories.residential.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
                 </div>
+              </div>
 
-                <button type="submit" className="premium-button" style={{ justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' }}>{t.seller.postBuilder}</button>
-              </form>
-            </div>
-          )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="input-group">
+                  <label>{t.seller.location}</label>
+                  <input name="location" placeholder="e.g. DLF Phase 5" required />
+                </div>
+                <div className="input-group">
+                  <label>{t.seller.price}</label>
+                  <input name="price" type="number" placeholder="50,00,000" required />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="input-group">
+                  <label>{sellerType === 'agricultural' ? t.seller.areaAcres : t.seller.areaSqft}</label>
+                  <input name="area" type="text" placeholder={sellerType === 'agricultural' ? 'e.g. 2 Acres' : '1200'} required />
+                </div>
+                <div className="input-group">
+                  <label>{t.seller.floors}</label>
+                  <input name="totalFloors" type="text" placeholder={sellerType === 'residential' ? "Total Floors (e.g. 4)" : "Additional Details"} />
+                </div>
+              </div>
+
+              {sellerType === 'residential' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="input-group"><label>{t.seller.beds}</label><input name="beds" type="number" placeholder="3" /></div>
+                  <div className="input-group"><label>{t.seller.baths}</label><input name="baths" type="number" placeholder="2" /></div>
+                </div>
+              )}
+
+              <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>{t.seller.postLead}</button>
+            </form>
+          </div>
         </div>
       </div>
     );
