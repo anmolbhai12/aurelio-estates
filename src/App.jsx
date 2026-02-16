@@ -642,8 +642,31 @@ _Verified Professional Lead_ 🟢`;
           <img src="/logo-tha-horizontal.svg" alt="Tha Logo" style={{ height: '70px', width: 'auto' }} />
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, maxWidth: '600px', marginLeft: '20px', marginRight: '20px' }}>
+          {/* Global Search Bar */}
+          {view === 'buyer' && (
+            <div style={{ flex: 1, position: 'relative' }}>
+              <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <input
+                type="text"
+                placeholder={t.buyer.searchPlaceholder || 'Search properties...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 15px 10px 45px',
+                  borderRadius: '100px',
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+          )}
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <a onClick={() => setView('buyer')} style={{ cursor: 'pointer', color: 'var(--text-primary)', fontWeight: '500' }}>{t.nav.marketplace}</a>
           <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
             <Plus size={18} /> {t.nav.postProperty}
           </button>
@@ -873,12 +896,19 @@ _Verified Professional Lead_ 🟢`;
 
   const BuyerView = () => (
     <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
         <div>
           <h2 style={{ fontSize: '2.5rem' }}>{t.buyer.title}</h2>
           <p style={{ color: 'var(--text-secondary)' }}>{t.buyer.subtitle} ({properties.length})</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            onClick={() => setView('buyer')}
+            className="secondary-button"
+            style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <HomeIcon size={18} /> {t.nav.marketplace || 'Marketplace'}
+          </button>
           <select
             className="glass"
             style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)' }}
@@ -1266,16 +1296,24 @@ _Verified Professional Lead_ 🟢`;
               className="premium-button"
               style={{ width: '100%', justifyContent: 'center', marginBottom: '15px', padding: '15px' }}
             >
+              {!user && <span style={{ marginRight: '8px' }}>🔒</span>}
               <MessageSquare size={18} /> Chat on WhatsApp
             </button>
 
-            <button className="glass" style={{ width: '100%', padding: '12px', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', border: '1px solid var(--glass-border)' }}>
-              Save to Favorites
+            <button
+              onClick={() => {
+                if (user) {
+                  window.location.href = `tel:${selectedProperty.phone}`;
+                } else {
+                  setView('auth');
+                }
+              }}
+              className="secondary-button"
+              style={{ width: '100%', justifyContent: 'center', padding: '15px' }}
+            >
+              {!user && <span style={{ marginRight: '8px' }}>🔒</span>}
+              <Phone size={18} /> Call Seller
             </button>
-
-            <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '20px' }}>
-              Secure & Private Communication via Tha Bot 🔒
-            </p>
           </div>
         </div>
       </div>

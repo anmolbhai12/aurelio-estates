@@ -277,6 +277,16 @@ textarea:focus {
     height: 18px !important;
   }
 
+  /* Navigation Search Bar - Mobile */
+  nav input[type="text"] {
+    font-size: 0.75rem !important;
+    padding: 8px 12px 8px 35px !important;
+  }
+
+  nav input[type="text"]+svg {
+    left: 10px !important;
+  }
+
   h1 {
     font-size: 2rem !important;
     line-height: 1.2 !important;
