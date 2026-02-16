@@ -32,6 +32,232 @@ import Peer from 'peerjs';
 // Mock Data
 const INITIAL_PROPERTIES = [];
 
+// Navigation Component
+const Nav = ({
+  t, view, setView, searchQuery, setSearchQuery,
+  isSearchActive, setIsSearchActive, filterType, setFilterType,
+  filterArea, setFilterArea, filterBudget, setFilterBudget,
+  user, setUser, showProfileMenu, setShowProfileMenu,
+  language, setLanguage, isChoosingLanguage, setIsChoosingLanguage,
+  setIsEditingName, setTempName, showConfirm
+}) => (
+  <nav className="glass" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, padding: '1rem 0' }}>
+    <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setView('landing')}>
+        <img src="/logo-tha-horizontal.svg" alt="Tha Logo" style={{ height: '70px', width: 'auto' }} />
+      </div>
+
+      <div className="nav-search-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, maxWidth: '600px', marginLeft: '20px', marginRight: '20px' }}>
+        {/* Global Search Bar - Now truly global */}
+        <div style={{ width: '100%', position: 'relative' }}>
+          <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+          <input
+            type="text"
+            placeholder={t.buyer.searchPlaceholder || 'Search properties...'}
+            value={searchQuery}
+            onFocus={() => setIsSearchActive(true)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (e.target.value && view !== 'buyer') {
+                setView('buyer');
+                setIsSearchActive(true);
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '10px 15px 10px 45px',
+              borderRadius: '100px',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+              fontSize: '0.9rem'
+            }}
+          />
+        </div>
+
+        {/* Quick Filters - Visible when search is active or has query */}
+        {(isSearchActive || searchQuery || (view === 'buyer' && searchQuery)) && (
+          <div className="animate-fade" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <select
+              className="glass"
+              style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">{t.filters.allTypes}</option>
+              <option value="residential">{t.filters.residential}</option>
+              <option value="commercial">{t.filters.commercial}</option>
+              <option value="industrial">{t.filters.industrial}</option>
+              <option value="agricultural">{t.filters.agricultural}</option>
+            </select>
+            <select
+              className="glass"
+              style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
+              value={filterArea}
+              onChange={(e) => setFilterArea(e.target.value)}
+            >
+              <option value="all">{t.filters.anyArea}</option>
+              <option value="small">{t.ranges.smallArea}</option>
+              <option value="medium">{t.ranges.mediumArea}</option>
+              <option value="large">{t.ranges.largeArea}</option>
+              <option value="xlarge">{t.ranges.xlargeArea}</option>
+            </select>
+            <select
+              className="glass"
+              style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
+              value={filterBudget}
+              onChange={(e) => setFilterBudget(e.target.value)}
+            >
+              <option value="all">{t.filters.anyBudget}</option>
+              <option value="budget">{t.ranges.under50L}</option>
+              <option value="mid">{t.ranges.midRange}</option>
+              <option value="premium">{t.ranges.premiumRange}</option>
+              <option value="luxury">{t.ranges.luxuryRange}</option>
+            </select>
+          </div>
+        )}
+      </div>
+
+      <div className="nav-buttons-container" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
+          <Plus size={18} /> {t.nav.postProperty}
+        </button>
+
+        <div style={{ position: 'relative' }}>
+          {user ? (
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', background: 'rgba(255,215,0,0.05)', padding: '5px 15px', borderRadius: '30px', border: '1px solid var(--accent-gold)' }}
+              onClick={() => {
+                setShowProfileMenu(!showProfileMenu);
+                if (!showProfileMenu) setIsChoosingLanguage(false);
+              }}
+            >
+              <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)' }}>{user.name || t.auth.legend}</span>
+              <User size={20} color="var(--accent-gold)" />
+            </div>
+          ) : (
+            <button
+              onClick={() => setView('auth')}
+              style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <User size={20} />
+            </button>
+          )}
+
+          {/* Profile Dropdown Menu */}
+          {showProfileMenu && user && (
+            <div
+              className="glass"
+              style={{
+                position: 'absolute',
+                top: '120%',
+                right: 0,
+                width: '240px',
+                padding: '15px',
+                borderRadius: '20px',
+                zIndex: 1001,
+                boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                border: '1px solid var(--accent-gold)'
+              }}
+            >
+              <div style={{ marginBottom: '15px', borderBottom: '1px solid rgba(212,175,55,0.2)', paddingBottom: '10px' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{language === 'en' ? 'Logged in as' : 'लॉग इन किया है'}</p>
+                <p style={{ fontWeight: 'bold', color: 'var(--accent-gold)' }}>{user.name}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user.phone}</p>
+              </div>
+
+              {isChoosingLanguage ? (
+                <div style={{ marginTop: '5px' }}>
+                  <button
+                    onClick={() => setIsChoosingLanguage(false)}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: 'var(--accent-gold)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}
+                    className="menu-item-hover"
+                  >
+                    <ArrowLeft size={16} /> {language === 'en' ? 'Back' : 'पीछे'}
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('en'); setIsChoosingLanguage(false); }}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px 15px', borderRadius: '10px', background: language === 'en' ? 'rgba(212,175,55,0.1)' : 'transparent', color: '#fff', border: '1px solid ' + (language === 'en' ? 'var(--accent-gold)' : 'transparent'), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}
+                    className="menu-item-hover"
+                  >
+                    <span>English</span>
+                    {language === 'en' && <Check size={14} color="var(--accent-gold)" />}
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('hi'); setIsChoosingLanguage(false); }}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px 15px', borderRadius: '10px', background: language === 'hi' ? 'rgba(212,175,55,0.1)' : 'transparent', color: '#fff', border: '1px solid ' + (language === 'hi' ? 'var(--accent-gold)' : 'transparent'), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    className="menu-item-hover"
+                  >
+                    <span>हिन्दी</span>
+                    {language === 'hi' && <Check size={14} color="var(--accent-gold)" />}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Edit Name Option */}
+                  <button
+                    onClick={() => {
+                      setTempName(user.name);
+                      setIsEditingName(true);
+                    }}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    className="menu-item-hover"
+                  >
+                    <User size={16} /> {language === 'en' ? 'Edit Name' : 'नाम बदलें'}
+                  </button>
+
+                  {/* My Properties Option */}
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      setView('my-properties');
+                    }}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}
+                    className="menu-item-hover"
+                  >
+                    <HomeIcon size={16} /> {t.nav.myProperties}
+                  </button>
+
+                  {/* Language Selection Trigger */}
+                  <button
+                    onClick={() => setIsChoosingLanguage(true)}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between', marginTop: '5px' }}
+                    className="menu-item-hover"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Languages size={16} /> {language === 'en' ? 'Language' : 'भाषा'}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-gold)', fontSize: '0.8rem', opacity: 0.8 }}>
+                      {language === 'en' ? 'English' : 'हिन्दी'} <ChevronRight size={14} />
+                    </div>
+                  </button>
+
+                  <div style={{ height: '1px', background: 'rgba(212,175,55,0.2)', margin: '10px 0' }}></div>
+
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      showConfirm(t.alerts.logout, () => {
+                        setUser(null);
+                        localStorage.removeItem('tha_user');
+                        setView('landing');
+                      });
+                    }}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#ff4444', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    className="menu-item-hover"
+                  >
+                    <LogOut size={16} /> {t.nav.logout || 'Logout'}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </nav>
+);
+
 function App() {
   const [view, setView] = useState('landing'); // landing, buyer, seller, detail, auth
   const [properties, setProperties] = useState(INITIAL_PROPERTIES);
@@ -639,567 +865,150 @@ _Verified Professional Lead_ 🟢`;
     }
   };
 
-  const Nav = () => (
-    <nav className="glass" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, padding: '1rem 0' }}>
-      <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setView('landing')}>
-          <img src="/logo-tha-horizontal.svg" alt="Tha Logo" style={{ height: '70px', width: 'auto' }} />
-        </div>
 
-        <div className="nav-search-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, maxWidth: '600px', marginLeft: '20px', marginRight: '20px' }}>
-          {/* Global Search Bar - Now truly global */}
-          <div style={{ width: '100%', position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-            <input
-              type="text"
-              placeholder={t.buyer.searchPlaceholder || 'Search properties...'}
-              value={searchQuery}
-              onFocus={() => setIsSearchActive(true)}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (e.target.value && view !== 'buyer') {
-                  setView('buyer');
-                  setIsSearchActive(true);
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '10px 15px 10px 45px',
-                borderRadius: '100px',
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-                fontSize: '0.9rem'
-              }}
-            />
-          </div>
-
-          {/* Quick Filters - Visible when search is active or has query */}
-          {(isSearchActive || searchQuery || (view === 'buyer' && searchQuery)) && (
-            <div className="animate-fade" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              <select
-                className="glass"
-                style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-              >
-                <option value="all">{t.filters.allTypes}</option>
-                <option value="residential">{t.filters.residential}</option>
-                <option value="commercial">{t.filters.commercial}</option>
-                <option value="industrial">{t.filters.industrial}</option>
-                <option value="agricultural">{t.filters.agricultural}</option>
-              </select>
-              <select
-                className="glass"
-                style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
-                value={filterArea}
-                onChange={(e) => setFilterArea(e.target.value)}
-              >
-                <option value="all">{t.filters.anyArea}</option>
-                <option value="small">{t.ranges.smallArea}</option>
-                <option value="medium">{t.ranges.mediumArea}</option>
-                <option value="large">{t.ranges.largeArea}</option>
-                <option value="xlarge">{t.ranges.xlargeArea}</option>
-              </select>
-              <select
-                className="glass"
-                style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
-                value={filterBudget}
-                onChange={(e) => setFilterBudget(e.target.value)}
-              >
-                <option value="all">{t.filters.anyBudget}</option>
-                <option value="budget">{t.ranges.under50L}</option>
-                <option value="mid">{t.ranges.midRange}</option>
-                <option value="premium">{t.ranges.premiumRange}</option>
-                <option value="luxury">{t.ranges.luxuryRange}</option>
-              </select>
-            </div>
-          )}
-        </div>
-
-        <div className="nav-buttons-container" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button onClick={() => user ? setView('seller') : setView('auth')} className="premium-button">
-            <Plus size={18} /> {t.nav.postProperty}
-          </button>
-
-          <div style={{ position: 'relative' }}>
-            {user ? (
-              <div
-                style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', background: 'rgba(255,215,0,0.05)', padding: '5px 15px', borderRadius: '30px', border: '1px solid var(--accent-gold)' }}
-                onClick={() => {
-                  setShowProfileMenu(!showProfileMenu);
-                  if (!showProfileMenu) setIsChoosingLanguage(false);
-                }}
-              >
-                <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)' }}>{user.name || t.auth.legend}</span>
-                <User size={20} color="var(--accent-gold)" />
-              </div>
-            ) : (
-              <button
-                onClick={() => setView('auth')}
-                style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                <User size={20} />
-              </button>
-            )}
-
-            {/* Profile Dropdown Menu */}
-            {showProfileMenu && user && (
-              <div
-                className="glass"
-                style={{
-                  position: 'absolute',
-                  top: '120%',
-                  right: 0,
-                  width: '240px',
-                  padding: '15px',
-                  borderRadius: '20px',
-                  zIndex: 1001,
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                  border: '1px solid var(--accent-gold)'
-                }}
-              >
-                <div style={{ marginBottom: '15px', borderBottom: '1px solid rgba(212,175,55,0.2)', paddingBottom: '10px' }}>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{language === 'en' ? 'Logged in as' : 'लॉग इन किया है'}</p>
-                  <p style={{ fontWeight: 'bold', color: 'var(--accent-gold)' }}>{user.name}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user.phone}</p>
-                </div>
-
-                {isChoosingLanguage ? (
-                  <div style={{ marginTop: '5px' }}>
-                    <button
-                      onClick={() => setIsChoosingLanguage(false)}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: 'var(--accent-gold)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}
-                      className="menu-item-hover"
-                    >
-                      <ArrowLeft size={16} /> {language === 'en' ? 'Back' : 'पीछे'}
-                    </button>
-                    <button
-                      onClick={() => { setLanguage('en'); setIsChoosingLanguage(false); }}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px 15px', borderRadius: '10px', background: language === 'en' ? 'rgba(212,175,55,0.1)' : 'transparent', color: '#fff', border: '1px solid ' + (language === 'en' ? 'var(--accent-gold)' : 'transparent'), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}
-                      className="menu-item-hover"
-                    >
-                      <span>English</span>
-                      {language === 'en' && <Check size={14} color="var(--accent-gold)" />}
-                    </button>
-                    <button
-                      onClick={() => { setLanguage('hi'); setIsChoosingLanguage(false); }}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px 15px', borderRadius: '10px', background: language === 'hi' ? 'rgba(212,175,55,0.1)' : 'transparent', color: '#fff', border: '1px solid ' + (language === 'hi' ? 'var(--accent-gold)' : 'transparent'), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                      className="menu-item-hover"
-                    >
-                      <span>हिन्दी</span>
-                      {language === 'hi' && <Check size={14} color="var(--accent-gold)" />}
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    {/* Edit Name Option */}
-                    <button
-                      onClick={() => {
-                        setTempName(user.name);
-                        setIsEditingName(true);
-                      }}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
-                      className="menu-item-hover"
-                    >
-                      <User size={16} /> {language === 'en' ? 'Edit Name' : 'नाम बदलें'}
-                    </button>
-
-                    {/* My Properties Option */}
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(false);
-                        setView('my-properties');
-                      }}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}
-                      className="menu-item-hover"
-                    >
-                      <HomeIcon size={16} /> {t.nav.myProperties}
-                    </button>
-
-                    {/* Language Selection Trigger */}
-                    <button
-                      onClick={() => setIsChoosingLanguage(true)}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between', marginTop: '5px' }}
-                      className="menu-item-hover"
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Languages size={16} /> {language === 'en' ? 'Language' : 'भाषा'}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-gold)', fontSize: '0.8rem', opacity: 0.8 }}>
-                        {language === 'en' ? 'English' : 'हिन्दी'} <ChevronRight size={14} />
-                      </div>
-                    </button>
-
-                    <div style={{ height: '1px', background: 'rgba(212,175,55,0.2)', margin: '10px 0' }}></div>
-
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(false);
-                        showConfirm(t.alerts.logout, () => {
-                          setUser(null);
-                          localStorage.removeItem('tha_user');
-                          setView('landing');
-                        });
-                      }}
-                      style={{ width: '100%', textAlign: 'left', padding: '10px', borderRadius: '10px', background: 'transparent', color: '#ff4444', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
-                      className="menu-item-hover"
-                    >
-                      <LogOut size={16} /> {t.nav.logout || 'Logout'}
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+  const LandingView = ({ t, setView, setIsSearchActive }) => (
+    <React.Fragment>
+      <div className="hero-section" style={{ height: '90vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div className="hero-bg"></div>
+        <div className="container hero-content">
+          <div className="animate-fade">
+            <span className="badge">{t.hero.badge}</span>
+            <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: '1.5rem', maxWidth: '900px', lineHeight: 1.1, color: '#fff' }}>
+              {t.hero.title.includes('Masterpiece') ? (
+                <>
+                  {t.hero.title.split('Masterpiece')[0]}
+                  <span className="text-gradient-gold">Masterpiece</span>
+                  {t.hero.title.split('Masterpiece')[1]}
+                </>
+              ) : t.hero.title}
+            </h1>
+            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
+              {t.hero.subtitle}
+            </p>
+            <button onClick={() => { setView('buyer'); setIsSearchActive(true); }} className="premium-button" style={{ padding: '18px 40px', fontSize: '1.2rem', marginTop: '1rem' }}>
+              {t.hero.findHomes} <ArrowRight size={20} style={{ marginLeft: '10px' }} />
+            </button>
           </div>
         </div>
       </div>
-    </nav>
+    </React.Fragment >
   );
 
-  const LandingView = () => {
+  // Buyer View Component
+  const BuyerView = ({
+    t, properties, searchQuery, filterType, filterArea, filterBudget, sortBy, setSortBy, setView, setSelectedProperty, user
+  }) => {
+    const filteredProperties = properties.filter(p => {
+      const matchesSearch = searchQuery === '' ||
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      const matchesType = filterType === 'all' || p.category?.toLowerCase() === filterType.toLowerCase();
+
+      // Area filter logic
+      let matchesArea = true;
+      if (filterArea !== 'all') {
+        const area = p.sqft || p.area || 0;
+        if (filterArea === 'small') matchesArea = area < 1000;
+        else if (filterArea === 'medium') matchesArea = area >= 1000 && area <= 3000;
+        else if (filterArea === 'large') matchesArea = area > 3000 && area <= 8000;
+        else if (filterArea === 'xlarge') matchesArea = area > 8000;
+      }
+
+      // Budget filter logic
+      let matchesBudget = true;
+      if (filterBudget !== 'all') {
+        const price = p.price || 0;
+        if (filterBudget === 'budget') matchesBudget = price < 5000000;
+        else if (filterBudget === 'mid') matchesBudget = price >= 5000000 && price <= 15000000;
+        else if (filterBudget === 'premium') matchesBudget = price > 15000000 && price <= 50000000;
+        else if (filterBudget === 'luxury') matchesBudget = price > 50000000;
+      }
+
+      return matchesSearch && matchesType && matchesArea && matchesBudget;
+    }).sort((a, b) => {
+      if (sortBy === 'priceHigh') return b.price - a.price;
+      if (sortBy === 'priceLow') return a.price - b.price;
+      if (sortBy === 'old') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+
     return (
-      <React.Fragment>
-        <div className="hero-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', backgroundColor: '#000', background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url("https://images.unsplash.com/photo-1600585154340-be6199f7a096?auto=format&fit=crop&w=1920&q=80")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-          <div className="container hero-content">
-            <div className="animate-fade">
-              <span className="badge">{t.hero.badge}</span>
-              <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: '1.5rem', maxWidth: '900px', lineHeight: 1.1, color: '#fff' }}>
-                {t.hero.title.includes('Masterpiece') ? (
-                  <>
-                    {t.hero.title.split('Masterpiece')[0]}
-                    <span className="text-gradient-gold">Masterpiece</span>
-                    {t.hero.title.split('Masterpiece')[1]}
-                  </>
-                ) : t.hero.title}
-              </h1>
-              <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
-                {t.hero.subtitle}
-              </p>
-              <button onClick={() => { setView('buyer'); setIsSearchActive(true); }} className="premium-button" style={{ padding: '18px 40px', fontSize: '1.2rem', marginTop: '1rem' }}>
-                {t.hero.findHomes} <ArrowRight size={20} style={{ marginLeft: '10px' }} />
-              </button>
-            </div>
+      <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
+          <div>
+            <h2 style={{ fontSize: '2.5rem' }}>{t.buyer.title}</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{t.buyer.subtitle} ({filteredProperties.length})</p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <button
+              onClick={() => setView('buyer')}
+              className="secondary-button"
+              style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <HomeIcon size={18} /> {t.nav.marketplace || 'Marketplace'}
+            </button>
+            <select
+              className="glass"
+              style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', background: 'transparent' }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="latest">Latest to Oldest</option>
+              <option value="old">Oldest to Latest</option>
+              <option value="priceHigh">Price: High to Low</option>
+              <option value="priceLow">Price: Low to High</option>
+            </select>
           </div>
         </div>
-      </React.Fragment >
-    );
-  };
 
-  const BuyerView = () => (
-    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
-        <div>
-          <h2 style={{ fontSize: '2.5rem' }}>{t.buyer.title}</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>{t.buyer.subtitle} ({properties.length})</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button
-            onClick={() => setView('buyer')}
-            className="secondary-button"
-            style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <HomeIcon size={18} /> {t.nav.marketplace || 'Marketplace'}
-          </button>
-          <select
-            className="glass"
-            style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)' }}
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="latest">Latest to Oldest</option>
-            <option value="old">Oldest to Latest</option>
-            <option value="priceHigh">Price: High to Low</option>
-            <option value="priceLow">Price: Low to High</option>
-          </select>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        {properties
-          .filter(p => {
-            const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.location.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesType = filterType === 'all' || p.type?.toLowerCase() === filterType.toLowerCase() || p.category?.toLowerCase() === filterType.toLowerCase();
-
-            // Area Filter Logic
-            let matchesArea = true;
-            if (filterArea !== 'all') {
-              const areaVal = parseInt(p.sqft || p.area) || 0;
-              if (filterArea === 'small') matchesArea = areaVal <= 1000;
-              else if (filterArea === 'medium') matchesArea = areaVal > 1000 && areaVal <= 2000;
-              else if (filterArea === 'large') matchesArea = areaVal > 2000 && areaVal <= 5000;
-              else if (filterArea === 'xlarge') matchesArea = areaVal > 5000;
-            }
-
-            // Budget Filter Logic
-            let matchesBudget = true;
-            if (filterBudget !== 'all') {
-              const price = p.price || 0;
-              if (filterBudget === 'budget') matchesBudget = price <= 5000000;
-              else if (filterBudget === 'mid') matchesBudget = price > 5000000 && price <= 10000000;
-              else if (filterBudget === 'premium') matchesBudget = price > 10000000 && price <= 50000000;
-              else if (filterBudget === 'luxury') matchesBudget = price > 50000000;
-            }
-
-            return matchesSearch && matchesType && matchesArea && matchesBudget;
-          })
-          .sort((a, b) => {
-            if (sortBy === 'priceHigh') return b.price - a.price;
-            if (sortBy === 'priceLow') return a.price - b.price;
-            if (sortBy === 'old') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-          })
-          .map(prop => (
+        <div className="property-grid">
+          {filteredProperties.map((p, index) => (
             <div
-              key={prop.id}
-              className="glass animate-fade property-card"
-              style={{
-                borderRadius: '15px',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease',
-                display: 'flex',
-                gap: '0',
-                minHeight: '180px',
-                flexDirection: 'row'
-              }}
+              key={p.id}
+              className="property-card glass animate-fade"
+              style={{ animationDelay: `${index * 0.1}s`, cursor: 'pointer' }}
               onClick={() => {
                 if (user) {
-                  setSelectedProperty(prop);
+                  setSelectedProperty(p);
                   setView('detail');
                 } else {
                   setView('auth');
                 }
               }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <div className="property-card-image" style={{ width: '30%', minWidth: '120px', maxWidth: '280px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                <img src={prop.image} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
-                  <span className="badge" style={{ background: 'var(--bg-primary)' }}>{prop.type || prop.category}</span>
+              <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
+                <img
+                  src={p.image}
+                  alt={p.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <div style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--accent-gold)', color: '#000', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                  {p.category}
                 </div>
               </div>
-              <div className="property-card-content" style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>
-                  <MapPin size={12} /> {prop.location}
+              <div style={{ padding: '25px' }}>
+                <div style={{ color: 'var(--accent-gold)', fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '10px' }}>
+                  ₹{p.price.toLocaleString('en-IN')}
                 </div>
-                <h3 className="property-card-title" style={{ fontSize: '1.15rem', marginBottom: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prop.title}</h3>
-                <div className="property-card-details" style={{ display: 'flex', gap: '12px', marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.8rem', flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Bed size={14} /> {prop.beds}</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Bath size={14} /> {prop.baths}</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Maximize size={14} /> {prop.sqft || prop.area}</span>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{p.title}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
+                  <MapPin size={14} /> {p.location}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid var(--glass-border)', paddingTop: '10px', gap: '10px' }}>
-                  <span className="property-card-price" style={{ fontSize: '1.3rem', color: 'var(--accent-gold)', fontWeight: 700 }}>₹{prop.price.toLocaleString()}</span>
-                  <button className="secondary-button" style={{ padding: '6px 14px', fontSize: '0.8rem', flexShrink: 0 }}>{t.buyer.details}</button>
+                <div style={{ display: 'flex', gap: '15px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-color)', paddingTop: '15px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Bed size={16} /> {p.beds}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Bath size={16} /> {p.baths}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Maximize size={16} /> {p.sqft || p.area} sqft</div>
                 </div>
               </div>
             </div>
           ))}
-      </div>
-    </div>
-  );
-
-  const PostPropertyView = () => {
-    const [sellerType, setSellerType] = useState('residential');
-    const [previewMedia, setPreviewMedia] = useState([]); // Array of { type, url }
-
-    const handleMediaChange = (e) => {
-      const files = Array.from(e.target.files);
-      if (files.length > 0) {
-        const newMedia = [];
-        let processedCount = 0;
-
-        files.forEach(file => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            newMedia.push({
-              type: file.type.startsWith('video') ? 'video' : 'image',
-              url: reader.result,
-              file: file
-            });
-            processedCount++;
-            if (processedCount === files.length) {
-              setPreviewMedia(prev => [...prev, ...newMedia]);
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-    };
-
-    const removeMedia = (index) => {
-      setPreviewMedia(prev => prev.filter((_, i) => i !== index));
-    };
-
-    const sellerCategories = {
-      residential: [t.filters.residential, t.filters.commercial, t.filters.industrial, t.filters.agricultural],
-      commercial: ['Office Space', 'Shop/Showroom', 'Commercial Plot', 'Warehouse/Godown', 'Co-working'],
-      industrial: ['Industrial Plot', 'Factory/Building', 'Shed/Godown'],
-      agricultural: ['Farm Land', 'Farmhouse']
-    };
-
-    return (
-      <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-
-          <div className="animate-fade">
-            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '2.5rem' }}>{t.seller.title.split(' ')[0]} <span className="text-gradient-gold">{t.seller.title.split(' ')[1]}</span></h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t.seller.subtitle}</p>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handlePostProfessional(e, 'seller', previewMedia);
-            }} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-              {/* Multi-Media Upload Section */}
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', color: 'var(--accent-gold)' }}>Property Photos & Videos</label>
-
-                {/* Gallery Preview */}
-                {previewMedia.length > 0 && (
-                  <div style={{
-                    display: 'flex',
-                    gap: '10px',
-                    overflowX: 'auto',
-                    paddingBottom: '10px',
-                    marginBottom: '10px'
-                  }}>
-                    {previewMedia.map((media, index) => (
-                      <div key={index} style={{ position: 'relative', flex: '0 0 100px', height: '100px', borderRadius: '10px', overflow: 'hidden' }}>
-                        {media.type === 'video' ? (
-                          <video
-                            src={media.url}
-                            controls
-                            playsInline
-                            preload="metadata"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
-                          />
-                        ) : (
-                          <img src={media.url} alt={`preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => removeMedia(index)}
-                          style={{
-                            position: 'absolute', top: '5px', right: '5px',
-                            background: 'rgba(0,0,0,0.7)', color: 'white',
-                            border: 'none', borderRadius: '50%', width: '20px', height: '20px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    <div
-                      onClick={() => document.getElementById('prop-media-input').click()}
-                      style={{
-                        flex: '0 0 100px', height: '100px', borderRadius: '10px',
-                        border: '1px dashed var(--text-secondary)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer', color: 'var(--text-secondary)'
-                      }}
-                    >
-                      <Plus size={24} />
-                    </div>
-                  </div>
-                )}
-
-                {!previewMedia.length && (
-                  <div
-                    onClick={() => document.getElementById('prop-media-input').click()}
-                    style={{
-                      height: '150px',
-                      borderRadius: '20px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '2px dashed var(--glass-border)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      <Camera size={30} style={{ marginBottom: '10px', opacity: 0.7 }} />
-                      <p>Upload Photos & Videos</p>
-                    </div>
-                  </div>
-                )}
-
-                <input
-                  id="prop-media-input"
-                  type="file"
-                  name="propertyMedia"
-                  accept="image/*,video/*"
-                  multiple
-                  onChange={handleMediaChange}
-                  style={{ display: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div className="input-group">
-                  <label>{t.seller.purpose}</label>
-                  <select name="purpose" className="glass">
-                    <option>{t.filters.forSale}</option>
-                    <option>{t.filters.forRent}</option>
-                    <option>{t.filters.lease}</option>
-                  </select>
-                </div>
-                <div className="input-group">
-                  <label>{t.seller.category}</label>
-                  <select name="category" className="glass">
-                    {sellerCategories.residential.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div className="input-group">
-                  <label>{t.seller.location}</label>
-                  <input name="location" placeholder="e.g. DLF Phase 5" required />
-                </div>
-                <div className="input-group">
-                  <label>Ownership Type</label>
-                  <select name="ownership" className="glass">
-                    <option>Freehold</option>
-                    <option>Power of Attorney (POA)</option>
-                    <option>Leasehold</option>
-                    <option>Stamp Duty</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div className="input-group"><label>{t.seller.price}</label><input name="price" type="number" placeholder="50,00,000" required /></div>
-                <div className="input-group"><label>{t.seller.areaSqft}</label><input name="area" type="text" placeholder="1200" required /></div>
-              </div>
-
-              <div className="input-group">
-                <label>{t.seller.floors}</label>
-                <input name="totalFloors" type="text" placeholder={sellerType === 'residential' ? "Total Floors (e.g. 4)" : "Additional Details"} />
-              </div>
-
-              {sellerType === 'residential' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="input-group"><label>{t.seller.beds}</label><input name="beds" type="number" placeholder="3" /></div>
-                  <div className="input-group"><label>{t.seller.baths}</label><input name="baths" type="number" placeholder="2" /></div>
-                </div>
-              )}
-
-              <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>{t.seller.postLead}</button>
-            </form>
-          </div>
         </div>
       </div>
     );
   };
+
 
   const PropertyDetailView = () => {
     const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
@@ -1807,12 +1616,63 @@ _Verified Professional Lead_ 🟢`;
     <div className="App">
       <CustomModal />
       <EditPropertyModal />
-      <Nav />
+      <Nav
+        t={t}
+        view={view}
+        setView={setView}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isSearchActive={isSearchActive}
+        setIsSearchActive={setIsSearchActive}
+        filterType={filterType}
+        setFilterType={setFilterType}
+        filterArea={filterArea}
+        setFilterArea={setFilterArea}
+        filterBudget={filterBudget}
+        setFilterBudget={setFilterBudget}
+        user={user}
+        setUser={setUser}
+        showProfileMenu={showProfileMenu}
+        setShowProfileMenu={setShowProfileMenu}
+        language={language}
+        setLanguage={setLanguage}
+        isChoosingLanguage={isChoosingLanguage}
+        setIsChoosingLanguage={setIsChoosingLanguage}
+        setIsEditingName={setIsEditingName}
+        setTempName={setTempName}
+        showConfirm={showConfirm}
+      />
 
-      {view === 'landing' && <LandingView />}
-      {view === 'buyer' && <BuyerView />}
-      {view === 'builders' && <BuyerView />} {/* Reusing buyer view for matching feed */}
-      {view === 'seller' && <PostPropertyView />}
+      {view === 'landing' && <LandingView t={t} setView={setView} setIsSearchActive={setIsSearchActive} />}
+      {view === 'buyer' && (
+        <BuyerView
+          t={t}
+          properties={properties}
+          searchQuery={searchQuery}
+          filterType={filterType}
+          filterArea={filterArea}
+          filterBudget={filterBudget}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          setView={setView}
+          setSelectedProperty={setSelectedProperty}
+        />
+      )}
+      {view === 'builders' && (
+        <BuyerView
+          t={t}
+          properties={properties}
+          searchQuery={searchQuery}
+          filterType={filterType}
+          filterArea={filterArea}
+          filterBudget={filterBudget}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          setView={setView}
+          setSelectedProperty={setSelectedProperty}
+        />
+      )} {/* Reusing buyer view for matching feed */}
+      {view === 'seller' && <PostPropertyView t={t} setView={setView} user={user} handlePostProfessional={handlePostProfessional} />}
       {view === 'detail' && selectedProperty && <PropertyDetailView />}
       {view === 'call' && <CallInterface />}
       {view === 'my-properties' && <MyPropertiesView />}
