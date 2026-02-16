@@ -337,7 +337,7 @@ const LandingView = ({ t, setView, setIsSearchActive }) => (
 
 // Buyer View Component
 const BuyerView = ({
-  t, properties, searchQuery, filterType, filterArea, filterBudget, sortBy, setSortBy, setView, setSelectedProperty, user
+  t, properties, searchQuery, filterType, filterArea, filterBudget, sortBy, setSortBy, setView, setSelectedProperty, user, language
 }) => {
   const filteredProperties = properties.filter(p => {
     const matchesSearch = searchQuery === '' ||
@@ -1940,6 +1940,7 @@ _Verified Professional Lead_ 🟢`;
           setView={setView}
           setSelectedProperty={setSelectedProperty}
           user={user}
+          language={language}
         />
       )}
       {view === 'builders' && (
@@ -1955,6 +1956,7 @@ _Verified Professional Lead_ 🟢`;
           setView={setView}
           setSelectedProperty={setSelectedProperty}
           user={user}
+          language={language}
         />
       )}
       {view === 'seller' && <PostPropertyView t={t} setView={setView} user={user} handlePostProfessional={handlePostProfessional} />}
