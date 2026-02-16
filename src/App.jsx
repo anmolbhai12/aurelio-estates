@@ -2259,7 +2259,7 @@ _Verified Professional Lead_ 🟢`;
               </span>
             </div>
             <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              {t.footer.rights} <span style={{ opacity: 0.5 }}>v5.0 (Global Launch) • v4.0.4 (Active Sync)</span>
+              {t.footer.rights} <span>v5.2 (Layout Fix - Round 5)</span>
             </p>
           </div>
         </footer>
