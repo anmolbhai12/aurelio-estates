@@ -58,7 +58,7 @@ const FoxAvatar = ({ size = 40 }) => {
     );
 };
 
-const FoxBot = ({ properties, setView, setSelectedProperty, userName }) => {
+const FoxBot = ({ properties, setView, setSelectedProperty, userName, user }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         {
@@ -94,6 +94,19 @@ const FoxBot = ({ properties, setView, setSelectedProperty, userName }) => {
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setIsTyping(true);
+
+        if (!user) {
+            const authMsg = {
+                id: Date.now() + 1,
+                type: 'bot',
+                text: "I only share my clever property tracks with members. 🦊 Please login to hunt for your next masterpiece!"
+            };
+            setMessages(prev => [...prev, authMsg]);
+            setIsTyping(false);
+            setInput('');
+            setTimeout(() => setView('auth'), 2500);
+            return;
+        }
 
         setTimeout(() => {
             processResponse(input);
@@ -149,7 +162,7 @@ const FoxBot = ({ properties, setView, setSelectedProperty, userName }) => {
     };
 
     return (
-        <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 9999, fontFamily: 'var(--font-main)' }} ref={botRef}>
+        <div style={{ position: 'fixed', bottom: window.innerWidth < 768 ? '20px' : '30px', right: window.innerWidth < 768 ? '20px' : '30px', zIndex: 9999, fontFamily: 'var(--font-main)' }} ref={botRef}>
             {!isOpen && (
                 <div style={{ position: 'relative' }}>
                     <div className="fox-hint" style={{
@@ -189,7 +202,9 @@ const FoxBot = ({ properties, setView, setSelectedProperty, userName }) => {
 
             {isOpen && (
                 <div className="glass" style={{
-                    width: '380px', height: '550px', borderRadius: '24px',
+                    width: window.innerWidth < 500 ? '90vw' : '380px',
+                    height: window.innerWidth < 500 ? '70vh' : '550px',
+                    borderRadius: '24px',
                     display: 'flex', flexDirection: 'column', overflow: 'hidden',
                     border: '1px solid #ff8c00', boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
                     backdropFilter: 'blur(25px)', animation: 'slideUp 0.4s ease-out'

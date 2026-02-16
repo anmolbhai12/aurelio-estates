@@ -893,7 +893,7 @@ _Verified Professional Lead_ 🟢`;
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         {properties
           .filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.location.toLowerCase().includes(searchQuery.toLowerCase()))
           .sort((a, b) => {
@@ -907,13 +907,13 @@ _Verified Professional Lead_ 🟢`;
               key={prop.id}
               className="glass animate-fade"
               style={{
-                borderRadius: '20px',
+                borderRadius: '15px',
                 overflow: 'hidden',
                 cursor: 'pointer',
                 transition: 'transform 0.3s ease',
                 display: 'flex',
                 gap: '0',
-                minHeight: '200px',
+                minHeight: window.innerWidth < 768 ? '140px' : '200px',
                 flexDirection: 'row'
               }}
               onClick={() => {
@@ -927,26 +927,25 @@ _Verified Professional Lead_ 🟢`;
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <div style={{ width: '30%', minWidth: '120px', maxWidth: '300px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+              <div style={{ width: '35%', minWidth: '100px', maxWidth: '300px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
                 <img src={prop.image} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                  <span className="badge" style={{ background: 'var(--bg-primary)', fontSize: '0.7rem', padding: '4px 10px' }}>{prop.type || prop.category}</span>
+                <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
+                  <span className="badge" style={{ background: 'var(--bg-primary)', fontSize: '0.6rem', padding: '3px 8px' }}>{prop.type || prop.category}</span>
                 </div>
               </div>
-              <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '5px' }}>
-                  <MapPin size={12} /> {prop.location}
+              <div style={{ padding: window.innerWidth < 768 ? '12px' : '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '3px' }}>
+                  <MapPin size={10} /> {prop.location}
                 </div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '10px', lineBreak: 'anywhere' }}>{prop.title}</h3>
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', color: 'var(--text-secondary)', fontSize: '0.85rem', flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Bed size={14} /> {prop.beds}</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Bath size={14} /> {prop.baths}</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Maximize size={14} /> {prop.sqft || prop.area}</span>
-                  {prop.ownership && <span style={{ color: 'var(--accent-gold)', opacity: 0.8 }}>• {prop.ownership}</span>}
+                <h3 style={{ fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem', marginBottom: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prop.title}</h3>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', color: 'var(--text-secondary)', fontSize: '0.75rem', flexWrap: 'wrap' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Bed size={12} /> {prop.beds}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Bath size={12} /> {prop.baths}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Maximize size={12} /> {prop.sqft || prop.area}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid var(--glass-border)', paddingTop: '15px' }}>
-                  <span style={{ fontSize: '1.4rem', color: 'var(--accent-gold)', fontWeight: 700 }}>₹{prop.price.toLocaleString()}</span>
-                  <button className="secondary-button" style={{ padding: '6px 15px', fontSize: '0.8rem' }}>{t.buyer.details}</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid var(--glass-border)', paddingTop: '10px' }}>
+                  <span style={{ fontSize: window.innerWidth < 768 ? '1.1rem' : '1.4rem', color: 'var(--accent-gold)', fontWeight: 700 }}>₹{prop.price.toLocaleString()}</span>
+                  <button className="secondary-button" style={{ padding: '4px 12px', fontSize: '0.75rem' }}>{t.buyer.details}</button>
                 </div>
               </div>
             </div>
@@ -1257,7 +1256,13 @@ _Verified Professional Lead_ 🟢`;
             </div>
 
             <button
-              onClick={() => setIsChatOpen(true)}
+              onClick={() => {
+                if (user) {
+                  setIsChatOpen(true);
+                } else {
+                  setView('auth');
+                }
+              }}
               className="premium-button"
               style={{ width: '100%', justifyContent: 'center', marginBottom: '15px', padding: '15px' }}
             >
@@ -1561,45 +1566,45 @@ _Verified Professional Lead_ 🟢`;
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {myProps.map(prop => (
               <div
                 key={prop.id}
                 className="glass animate-fade"
                 style={{
-                  borderRadius: '20px',
+                  borderRadius: '15px',
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'row',
-                  minHeight: '160px'
+                  minHeight: window.innerWidth < 768 ? '120px' : '160px'
                 }}
               >
-                <div style={{ width: '30%', minWidth: '100px', maxWidth: '250px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                <div style={{ width: '35%', minWidth: '100px', maxWidth: '250px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
                   <img src={prop.image || (prop.media && prop.media[0]?.url)} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                    <span className="badge" style={{ background: 'var(--bg-primary)', fontSize: '0.65rem' }}>{prop.category || 'Plot'}</span>
+                  <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
+                    <span className="badge" style={{ background: 'var(--bg-primary)', fontSize: '0.55rem', padding: '2px 6px' }}>{prop.category || 'Plot'}</span>
                   </div>
                 </div>
-                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <h3 style={{ fontSize: '1.15rem', marginBottom: '8px' }}>{prop.title}</h3>
-                  <div style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: '1.3rem', marginBottom: '15px' }}>
+                <div style={{ padding: window.innerWidth < 768 ? '12px' : '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+                  <h3 style={{ fontSize: window.innerWidth < 768 ? '1rem' : '1.15rem', marginBottom: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prop.title}</h3>
+                  <div style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: window.innerWidth < 768 ? '1.1rem' : '1.3rem', marginBottom: '10px' }}>
                     ₹{prop.price?.toLocaleString()}
                   </div>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => {
                         setSelectedProperty(prop);
                         setView('detail');
                       }}
                       className="secondary-button"
-                      style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                      style={{ padding: '4px 10px', fontSize: '0.7rem' }}
                     >
                       {t.buyer.details}
                     </button>
                     <button
                       onClick={() => setEditingProperty(prop)}
                       className="secondary-button"
-                      style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                      style={{ padding: '4px 10px', fontSize: '0.7rem' }}
                     >
                       {t.myProperties.edit}
                     </button>
@@ -1608,7 +1613,7 @@ _Verified Professional Lead_ 🟢`;
                         showConfirm(t.alerts.deleteProperty, () => handleDeleteProperty(prop.id));
                       }}
                       className="secondary-button"
-                      style={{ padding: '6px 12px', fontSize: '0.8rem', color: '#ff4444', borderColor: 'rgba(255,68,68,0.3)' }}
+                      style={{ padding: '4px 10px', fontSize: '0.7rem', color: '#ff4444', borderColor: 'rgba(255,68,68,0.3)' }}
                     >
                       {t.myProperties.delete}
                     </button>
@@ -2023,6 +2028,7 @@ _Verified Professional Lead_ 🟢`;
         setView={setView}
         setSelectedProperty={setSelectedProperty}
         userName={user?.name}
+        user={user}
       />
     </div>
   );
