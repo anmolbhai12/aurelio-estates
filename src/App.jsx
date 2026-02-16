@@ -38,9 +38,12 @@ function App() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [language, setLanguage] = useState('en');
   const [sortBy, setSortBy] = useState('latest'); // latest, priceHigh, priceLow, old
+  const [filterType, setFilterType] = useState('all');
+  const [filterArea, setFilterArea] = useState('all');
+  const [filterBudget, setFilterBudget] = useState('all');
+  const [filterListing, setFilterListing] = useState('all');
 
   const t = translations[language];
 
@@ -642,9 +645,9 @@ _Verified Professional Lead_ 🟢`;
           <img src="/logo-tha-horizontal.svg" alt="Tha Logo" style={{ height: '70px', width: 'auto' }} />
         </div>
 
-        <div className="nav-search-container" style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, maxWidth: '600px', marginLeft: '20px', marginRight: '20px' }}>
+        <div className="nav-search-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, maxWidth: '600px', marginLeft: '20px', marginRight: '20px' }}>
           {/* Global Search Bar - Now truly global */}
-          <div style={{ flex: 1, position: 'relative' }}>
+          <div style={{ width: '100%', position: 'relative' }}>
             <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
             <input
               type="text"
@@ -665,6 +668,48 @@ _Verified Professional Lead_ 🟢`;
               }}
             />
           </div>
+
+          {/* Quick Filters - Visible in Buyer mode or when searching */}
+          {(view === 'buyer' || searchQuery) && (
+            <div className="animate-fade" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <select
+                className="glass"
+                style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="all">{t.filters.allTypes}</option>
+                <option value="residential">{t.filters.residential}</option>
+                <option value="commercial">{t.filters.commercial}</option>
+                <option value="industrial">{t.filters.industrial}</option>
+                <option value="agricultural">{t.filters.agricultural}</option>
+              </select>
+              <select
+                className="glass"
+                style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
+                value={filterArea}
+                onChange={(e) => setFilterArea(e.target.value)}
+              >
+                <option value="all">{t.filters.anyArea}</option>
+                <option value="small">{t.ranges.smallArea}</option>
+                <option value="medium">{t.ranges.mediumArea}</option>
+                <option value="large">{t.ranges.largeArea}</option>
+                <option value="xlarge">{t.ranges.xlargeArea}</option>
+              </select>
+              <select
+                className="glass"
+                style={{ padding: '6px 12px', borderRadius: '20px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.75rem', background: 'rgba(212,175,55,0.05)' }}
+                value={filterBudget}
+                onChange={(e) => setFilterBudget(e.target.value)}
+              >
+                <option value="all">{t.filters.anyBudget}</option>
+                <option value="budget">{t.ranges.under50L}</option>
+                <option value="mid">{t.ranges.midRange}</option>
+                <option value="premium">{t.ranges.premiumRange}</option>
+                <option value="luxury">{t.ranges.luxuryRange}</option>
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="nav-buttons-container" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -810,55 +855,6 @@ _Verified Professional Lead_ 🟢`;
   const LandingView = () => {
     return (
       <React.Fragment>
-        {isSearchExpanded && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--accent-gold)', padding: '20px 0', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
-            <div className="container">
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                {/* Standalone language switcher removed as per request */}
-              </div>
-              <div className="glass" style={{ padding: '10px', borderRadius: '100px', display: 'flex', maxWidth: '800px', margin: '0 auto', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 25px', flex: 1 }}>
-                  <Search size={22} color="var(--accent-gold)" />
-                  <input autoFocus placeholder={t.hero.searchPlaceholder} style={{ background: 'transparent', border: 'none', padding: '12px 0', width: '100%', color: '#fff' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                  <button onClick={() => setIsSearchExpanded(false)} style={{ background: 'transparent', border: 'none', color: 'var(--accent-gold)', cursor: 'pointer', padding: '5px' }}>
-                    <X size={20} />
-                  </button>
-                </div>
-                <button onClick={() => setView('buyer')} className="premium-button">{t.hero.findHomes}</button>
-              </div>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">{t.filters.allTypes}</option>
-                  <option value="residential">{t.filters.residential}</option>
-                  <option value="commercial">{t.filters.commercial}</option>
-                  <option value="industrial">{t.filters.industrial}</option>
-                  <option value="agricultural">{t.filters.agricultural}</option>
-                </select>
-                <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">{t.filters.anyArea}</option>
-                  <option value="small">{t.ranges.smallArea}</option>
-                  <option value="medium">{t.ranges.mediumArea}</option>
-                  <option value="large">{t.ranges.largeArea}</option>
-                  <option value="xlarge">{t.ranges.xlargeArea}</option>
-                </select>
-                <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">{t.filters.anyBudget}</option>
-                  <option value="budget">{t.ranges.under50L}</option>
-                  <option value="mid">{t.ranges.midRange}</option>
-                  <option value="premium">{t.ranges.premiumRange}</option>
-                  <option value="luxury">{t.ranges.luxuryRange}</option>
-                </select>
-                <select className="glass" style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', fontSize: '0.9rem' }}>
-                  <option value="all">{t.filters.rentOrSale}</option>
-                  <option value="sale">{t.filters.forSale}</option>
-                  <option value="rent">{t.filters.forRent}</option>
-                  <option value="lease">{t.filters.lease}</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )
-        }
         <div className="hero-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', backgroundColor: '#000', background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url("https://images.unsplash.com/photo-1600585154340-be6199f7a096?auto=format&fit=crop&w=1920&q=80")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
           <div className="container hero-content">
             <div className="animate-fade">
@@ -916,7 +912,32 @@ _Verified Professional Lead_ 🟢`;
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         {properties
-          .filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.location.toLowerCase().includes(searchQuery.toLowerCase()))
+          .filter(p => {
+            const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.location.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesType = filterType === 'all' || p.type?.toLowerCase() === filterType.toLowerCase() || p.category?.toLowerCase() === filterType.toLowerCase();
+
+            // Area Filter Logic
+            let matchesArea = true;
+            if (filterArea !== 'all') {
+              const areaVal = parseInt(p.sqft || p.area) || 0;
+              if (filterArea === 'small') matchesArea = areaVal <= 1000;
+              else if (filterArea === 'medium') matchesArea = areaVal > 1000 && areaVal <= 2000;
+              else if (filterArea === 'large') matchesArea = areaVal > 2000 && areaVal <= 5000;
+              else if (filterArea === 'xlarge') matchesArea = areaVal > 5000;
+            }
+
+            // Budget Filter Logic
+            let matchesBudget = true;
+            if (filterBudget !== 'all') {
+              const price = p.price || 0;
+              if (filterBudget === 'budget') matchesBudget = price <= 5000000;
+              else if (filterBudget === 'mid') matchesBudget = price > 5000000 && price <= 10000000;
+              else if (filterBudget === 'premium') matchesBudget = price > 10000000 && price <= 50000000;
+              else if (filterBudget === 'luxury') matchesBudget = price > 50000000;
+            }
+
+            return matchesSearch && matchesType && matchesArea && matchesBudget;
+          })
           .sort((a, b) => {
             if (sortBy === 'priceHigh') return b.price - a.price;
             if (sortBy === 'priceLow') return a.price - b.price;
