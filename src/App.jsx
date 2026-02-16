@@ -1915,333 +1915,360 @@ _Verified Professional Lead_ 🟢`;
         setTempName={setTempName}
         showConfirm={showConfirm}
       />
-
-      {isChatOpen && (
-        <ChatOverlay
-          setIsChatOpen={setIsChatOpen}
-          selectedProperty={selectedProperty}
-          language={language}
-          user={user}
-          showAlert={showAlert}
+      {/* Backdrop for Search Blur Dismissal */}
+      {isSearchActive && (
+        <div
+          onClick={() => setIsSearchActive(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999,
+            background: 'rgba(0,0,0,0.1)'
+          }}
         />
       )}
 
-      {view === 'landing' && <LandingView t={t} setView={setView} setIsSearchActive={setIsSearchActive} />}
-      {view === 'buyer' && (
-        <BuyerView
-          t={t}
-          properties={properties}
-          searchQuery={searchQuery}
-          filterType={filterType}
-          filterArea={filterArea}
-          filterBudget={filterBudget}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          setView={setView}
-          setSelectedProperty={setSelectedProperty}
-          user={user}
-          language={language}
-        />
-      )}
-      {view === 'builders' && (
-        <BuyerView
-          t={t}
-          properties={properties}
-          searchQuery={searchQuery}
-          filterType={filterType}
-          filterArea={filterArea}
-          filterBudget={filterBudget}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          setView={setView}
-          setSelectedProperty={setSelectedProperty}
-          user={user}
-          language={language}
-        />
-      )}
-      {view === 'seller' && <PostPropertyView t={t} setView={setView} user={user} handlePostProfessional={handlePostProfessional} />}
-      {view === 'detail' && selectedProperty && (
-        <PropertyDetailView
-          t={t}
-          setView={setView}
-          selectedProperty={selectedProperty}
-          user={user}
-          setIsChatOpen={setIsChatOpen}
-        />
-      )}
-      {view === 'call' && <CallInterface showAlert={showAlert} />}
-      {view === 'my-properties' && (
-        <MyPropertiesView
-          t={t}
-          properties={properties}
-          user={user}
-          setView={setView}
-          setSelectedProperty={setSelectedProperty}
-          setEditingProperty={setEditingProperty}
-          handleDeleteProperty={handleDeleteProperty}
-        />
-      )}
+      {/* Main Content Blur Wrapper */}
+      <div
+        className="main-content-blur"
+        style={{
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          filter: isSearchActive ? 'blur(10px) brightness(0.7)' : 'none',
+          transform: isSearchActive ? 'scale(0.98)' : 'scale(1)',
+          opacity: isSearchActive ? 0.8 : 1,
+          pointerEvents: isSearchActive ? 'none' : 'auto'
+        }}
+      >
+        {isChatOpen && (
+          <ChatOverlay
+            setIsChatOpen={setIsChatOpen}
+            selectedProperty={selectedProperty}
+            language={language}
+            user={user}
+            showAlert={showAlert}
+          />
+        )}
 
-      {view === 'auth' && (
-        <div className="container" style={{ paddingTop: '150px', display: 'flex', justifyContent: 'center' }}>
-          <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
+        {view === 'landing' && <LandingView t={t} setView={setView} setIsSearchActive={setIsSearchActive} />}
+        {view === 'buyer' && (
+          <BuyerView
+            t={t}
+            properties={properties}
+            searchQuery={searchQuery}
+            filterType={filterType}
+            filterArea={filterArea}
+            filterBudget={filterBudget}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            setView={setView}
+            setSelectedProperty={setSelectedProperty}
+            user={user}
+            language={language}
+          />
+        )}
+        {view === 'builders' && (
+          <BuyerView
+            t={t}
+            properties={properties}
+            searchQuery={searchQuery}
+            filterType={filterType}
+            filterArea={filterArea}
+            filterBudget={filterBudget}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            setView={setView}
+            setSelectedProperty={setSelectedProperty}
+            user={user}
+            language={language}
+          />
+        )}
+        {view === 'seller' && <PostPropertyView t={t} setView={setView} user={user} handlePostProfessional={handlePostProfessional} />}
+        {view === 'detail' && selectedProperty && (
+          <PropertyDetailView
+            t={t}
+            setView={setView}
+            selectedProperty={selectedProperty}
+            user={user}
+            setIsChatOpen={setIsChatOpen}
+          />
+        )}
+        {view === 'call' && <CallInterface showAlert={showAlert} />}
+        {view === 'my-properties' && (
+          <MyPropertiesView
+            t={t}
+            properties={properties}
+            user={user}
+            setView={setView}
+            setSelectedProperty={setSelectedProperty}
+            setEditingProperty={setEditingProperty}
+            handleDeleteProperty={handleDeleteProperty}
+          />
+        )}
 
-            {/* Logo Header */}
-            <div style={{ marginBottom: '30px' }}>
-              <img src="/logo-tha.svg" alt="Tha" style={{ width: '120px', margin: '0 auto', display: 'block' }} />
-            </div>
+        {view === 'auth' && (
+          <div className="container" style={{ paddingTop: '150px', display: 'flex', justifyContent: 'center' }}>
+            <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
 
-            {/* Step 1: Phone Number Entry */}
-            {authStep === 1 && (
-              <>
-                <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{t.auth.login}</h2>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-                  {t.auth.connect}
-                </p>
+              {/* Logo Header */}
+              <div style={{ marginBottom: '30px' }}>
+                <img src="/logo-tha.svg" alt="Tha" style={{ width: '120px', margin: '0 auto', display: 'block' }} />
+              </div>
 
-                <form onSubmit={handleSendOTP} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div style={{ textAlign: 'left' }}>
-                    <label style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '8px' }}>
-                      Phone Number
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
-                        +91
-                      </div>
-                      <input
-                        type="tel"
-                        placeholder="99999 99999"
-                        value={phoneNumber}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setPhoneNumber(val);
-                        }}
-                        style={{ width: '100%', paddingLeft: '50px', fontSize: '1.1rem' }}
-                        required
-                      />
-                    </div>
-                  </div>
+              {/* Step 1: Phone Number Entry */}
+              {authStep === 1 && (
+                <>
+                  <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{t.auth.login}</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+                    {t.auth.connect}
+                  </p>
 
-                  <button type="submit" className="premium-button" style={{ justifyContent: 'center', padding: '14px' }}>
-                    Continue
-                  </button>
-                </form>
-              </>
-            )}
-
-            {/* Step 2: OTP Verification */}
-            {authStep === 2 && (
-              <>
-                <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{t.auth.verify}</h2>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-                  {t.auth.codeSent} <strong style={{ color: 'var(--accent-gold)' }}>+91 {phoneNumber}</strong>
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <input
-                    type="text"
-                    maxLength="6"
-                    placeholder={t.auth.enterCode}
-                    style={{ textAlign: 'center', fontSize: '1.8rem', letterSpacing: '8px', padding: '15px' }}
-                    onChange={(e) => e.target.value.length === 6 && handleVerifyOTP(e.target.value)}
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => {
-                      setAuthStep(1);
-                      setPhoneNumber('');
-                    }}
-                    style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                  >
-                    {t.auth.editPhone}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Step 3: New User Details */}
-            {authStep === 3 && (
-              <>
-                <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Almost There!</h2>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                  Complete your profile to get started
-                </p>
-
-                <form onSubmit={handleCompleteSignup} style={{ display: 'flex', flexDirection: 'column', gap: '18px', textAlign: 'left' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
-                      {t.auth.fullName}
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <User size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
-                      <input
-                        type="text"
-                        placeholder="Enter your name"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        style={{ width: '100%', paddingLeft: '45px' }}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
-                      Email Address
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <Mail size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
-                      <input
-                        type="email"
-                        placeholder="name@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={{ width: '100%', paddingLeft: '45px' }}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
-                        City
+                  <form onSubmit={handleSendOTP} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ textAlign: 'left' }}>
+                      <label style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '8px' }}>
+                        Phone Number
                       </label>
                       <div style={{ position: 'relative' }}>
-                        <MapPin size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                        <div style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
+                          +91
+                        </div>
+                        <input
+                          type="tel"
+                          placeholder="99999 99999"
+                          value={phoneNumber}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setPhoneNumber(val);
+                          }}
+                          style={{ width: '100%', paddingLeft: '50px', fontSize: '1.1rem' }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <button type="submit" className="premium-button" style={{ justifyContent: 'center', padding: '14px' }}>
+                      Continue
+                    </button>
+                  </form>
+                </>
+              )}
+
+              {/* Step 2: OTP Verification */}
+              {authStep === 2 && (
+                <>
+                  <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{t.auth.verify}</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+                    {t.auth.codeSent} <strong style={{ color: 'var(--accent-gold)' }}>+91 {phoneNumber}</strong>
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <input
+                      type="text"
+                      maxLength="6"
+                      placeholder={t.auth.enterCode}
+                      style={{ textAlign: 'center', fontSize: '1.8rem', letterSpacing: '8px', padding: '15px' }}
+                      onChange={(e) => e.target.value.length === 6 && handleVerifyOTP(e.target.value)}
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        setAuthStep(1);
+                        setPhoneNumber('');
+                      }}
+                      style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      {t.auth.editPhone}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* Step 3: New User Details */}
+              {authStep === 3 && (
+                <>
+                  <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Almost There!</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                    Complete your profile to get started
+                  </p>
+
+                  <form onSubmit={handleCompleteSignup} style={{ display: 'flex', flexDirection: 'column', gap: '18px', textAlign: 'left' }}>
+                    <div>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
+                        {t.auth.fullName}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <User size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
                           type="text"
-                          placeholder="Delhi"
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="Enter your name"
+                          value={userName}
+                          onChange={(e) => setUserName(e.target.value)}
                           style={{ width: '100%', paddingLeft: '45px' }}
                           required
                         />
                       </div>
                     </div>
+
                     <div>
                       <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
-                        Pincode
+                        Email Address
                       </label>
                       <div style={{ position: 'relative' }}>
-                        <Hash size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                        <Mail size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
-                          type="text"
-                          placeholder="110085"
-                          value={pincode}
-                          onChange={(e) => setPincode(e.target.value)}
+                          type="email"
+                          placeholder="name@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
                           style={{ width: '100%', paddingLeft: '45px' }}
-                          maxLength="6"
                           required
                         />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Terms & Conditions Checkbox */}
-                  <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      <input
-                        type="checkbox"
-                        checked={termsAccepted}
-                        onChange={(e) => setTermsAccepted(e.target.checked)}
-                        style={{ marginTop: '3px', cursor: 'pointer', accentColor: 'var(--accent-gold)' }}
-                        required
-                      />
-                      <span>
-                        I accept all{' '}
-                        <a
-                          href="/terms.html"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: 'var(--accent-gold)', textDecoration: 'underline', cursor: 'pointer' }}
-                        >
-                          Terms and Conditions
-                        </a>
-                        {' '}of the website
-                      </span>
-                    </label>
-                  </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
+                          City
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <MapPin size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                          <input
+                            type="text"
+                            placeholder="Delhi"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            style={{ width: '100%', paddingLeft: '45px' }}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', marginLeft: '10px', display: 'block', marginBottom: '6px' }}>
+                          Pincode
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <Hash size={18} color="var(--accent-gold)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                          <input
+                            type="text"
+                            placeholder="110085"
+                            value={pincode}
+                            onChange={(e) => setPincode(e.target.value)}
+                            style={{ width: '100%', paddingLeft: '45px' }}
+                            maxLength="6"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                  <button type="submit" className="premium-button" style={{ justifyContent: 'center', padding: '14px', marginTop: '10px' }}>
-                    Complete Signup
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                    {/* Terms & Conditions Checkbox */}
+                    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        <input
+                          type="checkbox"
+                          checked={termsAccepted}
+                          onChange={(e) => setTermsAccepted(e.target.checked)}
+                          style={{ marginTop: '3px', cursor: 'pointer', accentColor: 'var(--accent-gold)' }}
+                          required
+                        />
+                        <span>
+                          I accept all{' '}
+                          <a
+                            href="/terms.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: 'var(--accent-gold)', textDecoration: 'underline', cursor: 'pointer' }}
+                          >
+                            Terms and Conditions
+                          </a>
+                          {' '}of the website
+                        </span>
+                      </label>
+                    </div>
 
-      {/* Edit Name Modal */}
-      {isEditingName && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-          <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center', border: '1px solid var(--accent-gold)' }}>
-            <h2 style={{ color: 'var(--accent-gold)', marginBottom: '20px' }}>{language === 'en' ? 'Edit Your Name' : 'अपना नाम बदलें'}</h2>
-
-            <input
-              type="text"
-              value={tempName}
-              onChange={(e) => setTempName(e.target.value)}
-              className="premium-input"
-              placeholder={language === 'en' ? 'Enter new name' : 'नया नाम दर्ज करें'}
-              style={{ marginBottom: '20px', textAlign: 'center', width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: '15px', color: '#fff' }}
-              autoFocus
-            />
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => setIsEditingName(false)}
-                style={{ flex: 1, padding: '12px', borderRadius: '15px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
-              >
-                {language === 'en' ? 'Cancel' : 'रद्द करें'}
-              </button>
-              <button
-                onClick={handleUpdateName}
-                className="premium-button"
-                style={{ flex: 1 }}
-              >
-                {language === 'en' ? 'Save Changes' : 'बदलाव सुरक्षित करें'}
-              </button>
+                    <button type="submit" className="premium-button" style={{ justifyContent: 'center', padding: '14px', marginTop: '10px' }}>
+                      Complete Signup
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {isChatOpen && <ChatOverlay />}
+        {/* Edit Name Modal */}
+        {isEditingName && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+            <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center', border: '1px solid var(--accent-gold)' }}>
+              <h2 style={{ color: 'var(--accent-gold)', marginBottom: '20px' }}>{language === 'en' ? 'Edit Your Name' : 'अपना नाम बदलें'}</h2>
 
-      <footer style={{ background: 'var(--bg-secondary)', padding: '60px 0', marginTop: '60px', borderTop: '1px solid var(--glass-border)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>Tha</h2>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 30px' }}>
-            {t.footer.tagline}
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', color: 'var(--text-muted)' }}>
-            <a
-              href="/terms.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ cursor: 'pointer', color: 'var(--text-muted)', textDecoration: 'none' }}
-            >
-              {t.footer.terms}
-            </a>
-            <a
-              href="/privacy.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ cursor: 'pointer', color: 'var(--text-muted)', textDecoration: 'none' }}
-            >
-              {t.footer.privacy}
-            </a>
-            <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>
-              Contact - Coming Soon
-            </span>
+              <input
+                type="text"
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                className="premium-input"
+                placeholder={language === 'en' ? 'Enter new name' : 'नया नाम दर्ज करें'}
+                style={{ marginBottom: '20px', textAlign: 'center', width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: '15px', color: '#fff' }}
+                autoFocus
+              />
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={() => setIsEditingName(false)}
+                  style={{ flex: 1, padding: '12px', borderRadius: '15px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+                >
+                  {language === 'en' ? 'Cancel' : 'रद्द करें'}
+                </button>
+                <button
+                  onClick={handleUpdateName}
+                  className="premium-button"
+                  style={{ flex: 1 }}
+                >
+                  {language === 'en' ? 'Save Changes' : 'बदलाव सुरक्षित करें'}
+                </button>
+              </div>
+            </div>
           </div>
-          <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            {t.footer.rights} <span style={{ opacity: 0.5 }}>v5.0 (Global Launch) • v4.0.4 (Active Sync)</span>
-          </p>
-        </div>
-      </footer>
+        )}
+
+        {isChatOpen && <ChatOverlay />}
+
+        <footer style={{ background: 'var(--bg-secondary)', padding: '60px 0', marginTop: '60px', borderTop: '1px solid var(--glass-border)' }}>
+          <div className="container" style={{ textAlign: 'center' }}>
+            <h2 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>Tha</h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 30px' }}>
+              {t.footer.tagline}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', color: 'var(--text-muted)' }}>
+              <a
+                href="/terms.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ cursor: 'pointer', color: 'var(--text-muted)', textDecoration: 'none' }}
+              >
+                {t.footer.terms}
+              </a>
+              <a
+                href="/privacy.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ cursor: 'pointer', color: 'var(--text-muted)', textDecoration: 'none' }}
+              >
+                {t.footer.privacy}
+              </a>
+              <span style={{ color: 'var(--text-muted)', opacity: 0.6 }}>
+                Contact - Coming Soon
+              </span>
+            </div>
+            <p style={{ marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              {t.footer.rights} <span style={{ opacity: 0.5 }}>v5.0 (Global Launch) • v4.0.4 (Active Sync)</span>
+            </p>
+          </div>
+        </footer>
+      </div>
       {/* FOX - THE CLEVER AI BOT */}
       <FoxBot
         properties={properties}
@@ -2250,7 +2277,7 @@ _Verified Professional Lead_ 🟢`;
         userName={user?.name}
         user={user}
       />
-    </div>
+    </div >
   );
 }
 
