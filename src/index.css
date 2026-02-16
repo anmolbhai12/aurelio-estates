@@ -231,14 +231,30 @@ textarea:focus {
     gap: 30px;
   }
 
+  /* Restore List Layout on Mobile (Horizontal) */
   .property-card-container {
-    flex-direction: column !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    min-height: 120px;
   }
 
   .property-card-image-box {
-    width: 100% !important;
-    min-width: 100% !important;
-    height: 250px !important;
+    width: 110px !important;
+    min-width: 110px !important;
+    height: auto !important;
+  }
+
+  .property-card-content {
+    padding: 10px !important;
+  }
+
+  .property-card-content h3 {
+    font-size: 1rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  .property-card-content .price {
+    font-size: 1.1rem !important;
   }
 
   /* Nav adjustments ... */

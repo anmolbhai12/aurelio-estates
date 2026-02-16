@@ -83,8 +83,8 @@ const Nav = ({
           />
         </div>
 
-        {/* Quick Filters - Visible when search is active or has query */}
-        {(isSearchActive || searchQuery || (view === 'buyer' && searchQuery)) && (
+        {/* Quick Filters - Always visible in Buyer view or when searching */}
+        {(isSearchActive || searchQuery || view === 'buyer') && (
           <div className="animate-fade" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <select
               className="glass"
