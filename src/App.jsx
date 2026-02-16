@@ -258,6 +258,997 @@ const Nav = ({
   </nav>
 );
 
+// Custom Modal Component (First definition, already outside App)
+const CustomModal = ({ modal, closeModal }) => {
+  if (!modal.show) return null;
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+      <div className="glass animate-fade" style={{ padding: '35px', borderRadius: '30px', width: '100%', maxWidth: '400px', textAlign: 'center', border: '1px solid var(--accent-gold)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+        <div style={{ marginBottom: '20px' }}>
+          {modal.type === 'confirm' ? (
+            <div style={{ width: '60px', height: '60px', background: 'rgba(212,175,55,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', border: '1px solid var(--accent-gold)' }}>
+              <X size={30} color="var(--accent-gold)" />
+            </div>
+          ) : (
+            <div style={{ width: '60px', height: '60px', background: 'rgba(212,175,55,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', border: '1px solid var(--accent-gold)' }}>
+              <Check size={30} color="var(--accent-gold)" />
+            </div>
+          )}
+        </div>
+        <p style={{ fontSize: '1.2rem', marginBottom: '30px', color: '#fff', lineHeight: 1.5 }}>{modal.msg}</p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {modal.type === 'confirm' && (
+            <button
+              onClick={closeModal}
+              style={{ flex: 1, padding: '12px', borderRadius: '15px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+            >
+              Cancel
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (modal.type === 'confirm' && modal.onConfirm) modal.onConfirm();
+              closeModal();
+            }}
+            className="premium-button"
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            {modal.type === 'confirm' ? 'Confirm' : 'OK'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LandingView = ({ t, setView, setIsSearchActive }) => (
+  <React.Fragment>
+    <div className="hero-section" style={{ height: '90vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div className="hero-bg"></div>
+      <div className="container hero-content">
+        <div className="animate-fade">
+          <span className="badge">{t.hero.badge}</span>
+          <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: '1.5rem', maxWidth: '900px', lineHeight: 1.1, color: '#fff' }}>
+            {t.hero.title.includes('Masterpiece') ? (
+              <>
+                {t.hero.title.split('Masterpiece')[0]}
+                <span className="text-gradient-gold">Masterpiece</span>
+                {t.hero.title.split('Masterpiece')[1]}
+              </>
+            ) : t.hero.title}
+          </h1>
+          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
+            {t.hero.subtitle}
+          </p>
+          <button onClick={() => { setView('buyer'); setIsSearchActive(true); }} className="premium-button" style={{ padding: '18px 40px', fontSize: '1.2rem', marginTop: '1rem' }}>
+            {t.hero.findHomes} <ArrowRight size={20} style={{ marginLeft: '10px' }} />
+          </button>
+        </div>
+      </div>
+    </div>
+  </React.Fragment >
+);
+
+// Buyer View Component
+const BuyerView = ({
+  t, properties, searchQuery, filterType, filterArea, filterBudget, sortBy, setSortBy, setView, setSelectedProperty, user
+}) => {
+  const filteredProperties = properties.filter(p => {
+    const matchesSearch = searchQuery === '' ||
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesType = filterType === 'all' || p.category?.toLowerCase() === filterType.toLowerCase();
+
+    // Area filter logic
+    let matchesArea = true;
+    if (filterArea !== 'all') {
+      const area = p.sqft || p.area || 0;
+      if (filterArea === 'small') matchesArea = area < 1000;
+      else if (filterArea === 'medium') matchesArea = area >= 1000 && area <= 3000;
+      else if (filterArea === 'large') matchesArea = area > 3000 && area <= 8000;
+      else if (filterArea === 'xlarge') matchesArea = area > 8000;
+    }
+
+    // Budget filter logic
+    let matchesBudget = true;
+    if (filterBudget !== 'all') {
+      const price = p.price || 0;
+      if (filterBudget === 'budget') matchesBudget = price < 5000000;
+      else if (filterBudget === 'mid') matchesBudget = price >= 5000000 && price <= 15000000;
+      else if (filterBudget === 'premium') matchesBudget = price > 15000000 && price <= 50000000;
+      else if (filterBudget === 'luxury') matchesBudget = price > 50000000;
+    }
+
+    return matchesSearch && matchesType && matchesArea && matchesBudget;
+  }).sort((a, b) => {
+    if (sortBy === 'priceHigh') return b.price - a.price;
+    if (sortBy === 'priceLow') return a.price - b.price;
+    if (sortBy === 'old') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
+
+  return (
+    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
+        <div>
+          <h2 style={{ fontSize: '2.5rem' }}>{t.buyer.title}</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>{t.buyer.subtitle} ({filteredProperties.length})</p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            onClick={() => setView('buyer')}
+            className="secondary-button"
+            style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <HomeIcon size={18} /> {t.nav.marketplace || 'Marketplace'}
+          </button>
+          <select
+            className="glass"
+            style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', background: 'transparent' }}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="latest">Latest to Oldest</option>
+            <option value="old">Oldest to Latest</option>
+            <option value="priceHigh">Price: High to Low</option>
+            <option value="priceLow">Price: Low to High</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="property-grid">
+        {filteredProperties.map((p, index) => (
+          <div
+            key={p.id}
+            className="property-card glass animate-fade"
+            style={{ animationDelay: `${index * 0.1}s`, cursor: 'pointer' }}
+            onClick={() => {
+              if (user) {
+                setSelectedProperty(p);
+                setView('detail');
+              } else {
+                setView('auth');
+              }
+            }}
+          >
+            <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
+              <img
+                src={p.image}
+                alt={p.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--accent-gold)', color: '#000', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                {p.category}
+              </div>
+            </div>
+            <div style={{ padding: '25px' }}>
+              <div style={{ color: 'var(--accent-gold)', fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '10px' }}>
+                ₹{p.price.toLocaleString('en-IN')}
+              </div>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{p.title}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
+                <MapPin size={14} /> {p.location}
+              </div>
+              <div style={{ display: 'flex', gap: '15px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-color)', paddingTop: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Bed size={16} /> {p.beds}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Bath size={16} /> {p.baths}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Maximize size={16} /> {p.sqft || p.area} sqft</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const PostPropertyView = ({ t, setView, user, handlePostProfessional }) => {
+  const [sellerType, setSellerType] = useState('residential');
+  const [previewMedia, setPreviewMedia] = useState([]); // Array of { type, url }
+
+  const handleMediaChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      const newMedia = [];
+      let processedCount = 0;
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newMedia.push({
+            type: file.type.startsWith('video') ? 'video' : 'image',
+            url: reader.result,
+            file: file
+          });
+          processedCount++;
+          if (processedCount === files.length) {
+            setPreviewMedia(prev => [...prev, ...newMedia]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeMedia = (index) => {
+    setPreviewMedia(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const sellerCategories = {
+    residential: [t.filters.residential, t.filters.commercial, t.filters.industrial, t.filters.agricultural],
+    commercial: ['Office Space', 'Shop/Showroom', 'Commercial Plot', 'Warehouse/Godown', 'Co-working'],
+    industrial: ['Industrial Plot', 'Factory/Building', 'Shed/Godown'],
+    agricultural: ['Farm Land', 'Farmhouse']
+  };
+
+  return (
+    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+
+        <div className="animate-fade">
+          <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2.5rem' }}>{t.seller.title.split(' ')[0]} <span className="text-gradient-gold">{t.seller.title.split(' ')[1]}</span></h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{t.seller.subtitle}</p>
+          </div>
+
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handlePostProfessional(e, 'seller', previewMedia);
+          }} className="glass" style={{ padding: '30px', borderRadius: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+            {/* Multi-Media Upload Section */}
+            <div style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '10px', color: 'var(--accent-gold)' }}>Property Photos & Videos</label>
+
+              {/* Gallery Preview */}
+              {previewMedia.length > 0 && (
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  overflowX: 'auto',
+                  paddingBottom: '10px',
+                  marginBottom: '10px'
+                }}>
+                  {previewMedia.map((media, index) => (
+                    <div key={index} style={{ position: 'relative', flex: '0 0 100px', height: '100px', borderRadius: '10px', overflow: 'hidden' }}>
+                      {media.type === 'video' ? (
+                        <video
+                          src={media.url}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
+                        />
+                      ) : (
+                        <img src={media.url} alt={`preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeMedia(index)}
+                        style={{
+                          position: 'absolute', top: '5px', right: '5px',
+                          background: 'rgba(0,0,0,0.7)', color: 'white',
+                          border: 'none', borderRadius: '50%', width: '20px', height: '20px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <div
+                    onClick={() => document.getElementById('prop-media-input').click()}
+                    style={{
+                      flex: '0 0 100px', height: '100px', borderRadius: '10px',
+                      border: '1px dashed var(--text-secondary)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', color: 'var(--text-secondary)'
+                    }}
+                  >
+                    <Plus size={24} />
+                  </div>
+                </div>
+              )}
+
+              {!previewMedia.length && (
+                <div
+                  onClick={() => document.getElementById('prop-media-input').click()}
+                  style={{
+                    height: '150px',
+                    borderRadius: '20px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '2px dashed var(--glass-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <Camera size={30} style={{ marginBottom: '10px', opacity: 0.7 }} />
+                    <p>Upload Photos & Videos</p>
+                  </div>
+                </div>
+              )}
+
+              <input
+                id="prop-media-input"
+                type="file"
+                name="propertyMedia"
+                accept="image/*,video/*"
+                multiple
+                onChange={handleMediaChange}
+                style={{ display: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group">
+                <label>{t.seller.purpose}</label>
+                <select name="purpose" className="glass">
+                  <option>{t.filters.forSale}</option>
+                  <option>{t.filters.forRent}</option>
+                  <option>{t.filters.lease}</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>{t.seller.category}</label>
+                <select name="category" className="glass">
+                  {sellerCategories.residential.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group">
+                <label>{t.seller.location}</label>
+                <input name="location" placeholder="e.g. DLF Phase 5" required />
+              </div>
+              <div className="input-group">
+                <label>Ownership Type</label>
+                <select name="ownership" className="glass">
+                  <option>Freehold</option>
+                  <option>Power of Attorney (POA)</option>
+                  <option>Leasehold</option>
+                  <option>Stamp Duty</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="input-group"><label>{t.seller.price}</label><input name="price" type="number" placeholder="50,00,000" required /></div>
+              <div className="input-group"><label>{t.seller.areaSqft}</label><input name="area" type="text" placeholder="1200" required /></div>
+            </div>
+
+            <div className="input-group">
+              <label>{t.seller.floors}</label>
+              <input name="totalFloors" type="text" placeholder={sellerType === 'residential' ? "Total Floors (e.g. 4)" : "Additional Details"} />
+            </div>
+
+            {sellerType === 'residential' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="input-group"><label>{t.seller.beds}</label><input name="beds" type="number" placeholder="3" /></div>
+                <div className="input-group"><label>{t.seller.baths}</label><input name="baths" type="number" placeholder="2" /></div>
+              </div>
+            )}
+
+            <button type="submit" className="premium-button" style={{ justifyContent: 'center' }}>{t.seller.postLead}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PropertyDetailView = ({ t, setView, selectedProperty, user, setIsChatOpen }) => {
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+
+  if (!selectedProperty) return null;
+
+  // Normalize media for display (handle legacy properties)
+  const mediaList = selectedProperty.media || [{ type: 'image', url: selectedProperty.image }];
+  const currentMedia = mediaList[selectedMediaIndex] || mediaList[0];
+
+  return (
+    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+      <button onClick={() => setView('buyer')} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+        <X size={18} /> {t.detail.back}
+      </button>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '40px', alignItems: 'start' }}>
+        {/* Left Side: Media & Description */}
+        <div>
+          <div style={{ borderRadius: '30px', overflow: 'hidden', background: '#000', height: '500px', marginBottom: '20px', position: 'relative', border: '1px solid var(--glass-border)' }}>
+            {currentMedia.type === 'video' ? (
+              <video src={currentMedia.url} controls autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+              <img src={currentMedia.url} alt="property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            )}
+          </div>
+
+          {mediaList.length > 1 && (
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '30px', paddingBottom: '10px' }}>
+              {mediaList.map((m, i) => (
+                <div
+                  key={i}
+                  onClick={() => setSelectedMediaIndex(i)}
+                  style={{
+                    flex: '0 0 80px', height: '80px', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer',
+                    border: selectedMediaIndex === i ? '2px solid var(--accent-gold)' : '2px solid transparent',
+                    opacity: selectedMediaIndex === i ? 1 : 0.6
+                  }}
+                >
+                  {m.type === 'video' ? (
+                    <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Play size={20} color="#fff" /></div>
+                  ) : (
+                    <img src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="glass" style={{ padding: '30px', borderRadius: '30px' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '20px', fontFamily: 'Playfair Display' }}>{selectedProperty.title}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', marginBottom: '30px' }}>
+              <MapPin size={18} color="var(--accent-gold)" /> {selectedProperty.location}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '40px', padding: '20px 0', borderTop: '1px solid var(--glass-border)', borderBottom: '1px solid var(--glass-border)' }}>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Beds</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <Bed size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.beds}</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Baths</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <Bath size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.baths}</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Area</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <Maximize size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.area || selectedProperty.sqft}</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Floors</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <HomeIcon size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.floors || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+
+            <h4 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>Description</h4>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+              {selectedProperty.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side: Price & Chat (Sticky) */}
+        <div className="glass" style={{ padding: '30px', borderRadius: '30px', position: 'sticky', top: '120px', border: '1px solid var(--accent-gold)' }}>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '5px' }}>Listing Price</p>
+          <h2 style={{ fontSize: '3rem', color: 'var(--accent-gold)', marginBottom: '2rem', fontFamily: 'Playfair Display' }}>₹{selectedProperty.price.toLocaleString()}</h2>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '2rem', padding: '15px', background: 'rgba(255,255,215,0.05)', borderRadius: '15px', border: '1px solid rgba(212,175,55,0.2)' }}>
+            <div style={{ width: '50px', height: '50px', background: 'var(--accent-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 700, color: 'var(--bg-primary)' }}>
+              {selectedProperty.seller.charAt(0)}
+            </div>
+            <div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status: Verified</p>
+              <h4 style={{ fontSize: '1.1rem' }}>{selectedProperty.seller}</h4>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              if (user) {
+                setIsChatOpen(true);
+              } else {
+                setView('auth');
+              }
+            }}
+            className="premium-button"
+            style={{ width: '100%', justifyContent: 'center', marginBottom: '15px', padding: '15px' }}
+          >
+            {!user && <span style={{ marginRight: '8px' }}>🔒</span>}
+            <MessageSquare size={18} /> Chat on WhatsApp
+          </button>
+
+          <button
+            onClick={() => {
+              if (user) {
+                window.location.href = `tel:${selectedProperty.mobile || selectedProperty.phone}`;
+              } else {
+                setView('auth');
+              }
+            }}
+            className="secondary-button"
+            style={{ width: '100%', justifyContent: 'center', padding: '15px' }}
+          >
+            {!user && <span style={{ marginRight: '8px' }}>🔒</span>}
+            <Phone size={18} /> Call Seller
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ChatOverlay = ({ setIsChatOpen, selectedProperty, language, user, showAlert }) => {
+  if (!selectedProperty) return null;
+  return (
+    <div className="glass" style={{
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '90%',
+      maxWidth: '430px',
+      borderRadius: '30px',
+      zIndex: 1001,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      boxShadow: '0 20px 80px rgba(0,0,0,0.8)',
+      background: 'rgba(10, 10, 10, 0.98)',
+      border: '1px solid var(--accent-gold)',
+      backdropFilter: 'blur(20px)'
+    }}>
+      <div style={{ padding: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(212,175,55,0.2)' }}>
+        <h3 style={{ margin: 0, fontFamily: 'Playfair Display', color: 'var(--accent-gold)' }}>Connect Privately</h3>
+        <button onClick={() => setIsChatOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+          <X size={24} />
+        </button>
+      </div>
+
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 25px' }}>
+          <div style={{
+            width: '100%', height: '100%',
+            background: 'linear-gradient(135deg, var(--accent-gold), #b38b2d)',
+            borderRadius: '25px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '2.2rem', fontWeight: 800,
+            color: 'var(--bg-primary)',
+            boxShadow: '0 10px 20px rgba(212,175,55,0.3)'
+          }}>
+            {selectedProperty.seller.charAt(0)}
+          </div>
+          <div style={{
+            position: 'absolute', bottom: '-5px', right: '-5px',
+            background: '#25D366', width: '28px', height: '28px',
+            borderRadius: '50%', border: '4px solid #000',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <Check size={14} color="white" strokeWidth={3} />
+          </div>
+        </div>
+
+        <h2 style={{ marginBottom: '8px', fontSize: '1.8rem' }}>{selectedProperty.seller}</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '35px' }}>
+          {language === 'en' ? 'Verified Professional' : 'सत्यापित पेशेवर'}
+        </p>
+
+        <div style={{
+          background: 'rgba(212,175,55,0.05)',
+          padding: '20px',
+          borderRadius: '20px',
+          marginBottom: '30px',
+          border: '1px dashed rgba(212,175,55,0.3)',
+          textAlign: 'left'
+        }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Privacy Shield Active 🛡️</p>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            {language === 'en'
+              ? "Your phone number is hidden. You will chat via the central Tha Bot number to protect your privacy."
+              : "आपका फ़ोन नंबर छिपा हुआ है। आपकी गोपनीयता बनाए रखने के लिए आप केंद्रीय 'Tha Bot' नंबर द्वारा चैट करेंगे।"}
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            const botNumber = "919186090113";
+            const msg = `Hi Tha, I'm interested in viewing Property #${selectedProperty.id}: ${selectedProperty.title} (${selectedProperty.location}). Can you help me connect?`;
+            window.open(`https://wa.me/${botNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+          }}
+          className="premium-button"
+          style={{ width: '100%', justifyContent: 'center', background: '#25D366', color: '#fff', border: 'none', padding: '18px', fontSize: '1.1rem' }}
+        >
+          <MessageSquare size={22} style={{ marginRight: '10px' }} />
+          {language === 'en' ? 'Chat via Tha Bot' : 'Tha Bot द्वारा चैट करें'}
+        </button>
+
+        <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          Both parties chat via <b>+91 9186090113</b>
+        </p>
+
+        <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+          <button
+            onClick={async () => {
+              if (!user) {
+                showAlert("Please login to use secure calling.");
+                return;
+              }
+              try {
+                const res = await fetch('/initiate-call', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    buyerPhone: user.phone,
+                    sellerPhone: selectedProperty.mobile || selectedProperty.phone,
+                    propertyId: selectedProperty.id,
+                    propertyTitle: selectedProperty.title
+                  })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  window.location.href = `/?view=call&id=${data.callId}&role=initiator`;
+                } else {
+                  showAlert(data.error || "Call rejected by server.");
+                }
+              } catch (e) {
+                showAlert("Network Error: Could not connect to call server.");
+              }
+            }}
+            className="premium-button"
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              background: 'rgba(212,175,55,0.1)',
+              border: '2px solid var(--accent-gold)',
+              color: 'var(--accent-gold)',
+              padding: '18px',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              boxShadow: '0 0 15px rgba(212,175,55,0.2)'
+            }}
+          >
+            <Phone size={22} style={{ marginRight: '10px' }} />
+            {language === 'en' ? 'Secure Voice Call' : 'सुरक्षित वॉयस कॉल'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CallInterface = ({ showAlert }) => {
+  const [callStatus, setCallStatus] = useState('connecting'); // connecting, ringing, connected, ended
+  const [isMuted, setIsMuted] = useState(false);
+  const peerRef = useRef(null);
+  const remoteAudioRef = useRef(new Audio());
+  const localStreamRef = useRef(null);
+  const urlParams = new URLSearchParams(window.location.search);
+  const callId = urlParams.get('id');
+  const role = urlParams.get('role');
+
+  useEffect(() => {
+    if (!callId) return;
+
+    const peer = new Peer(role === 'initiator' ? `${callId}-buyer` : `${callId}-seller`, {
+      debug: 2
+    });
+    peerRef.current = peer;
+
+    peer.on('open', async (id) => {
+      console.log('✅ Peer ID:', id);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        localStreamRef.current = stream;
+
+        if (role === 'initiator') {
+          setCallStatus('ringing');
+          // Initiator waits a bit for the seller to answer the WhatsApp message
+          setTimeout(() => {
+            const call = peer.call(`${callId}-seller`, stream);
+            handleCall(call);
+          }, 5000);
+        }
+      } catch (err) {
+        showAlert("Microphone access denied. Please enable it to call.");
+        setCallStatus('ended');
+      }
+    });
+
+    peer.on('call', (call) => {
+      setCallStatus('connected');
+      call.answer(localStreamRef.current);
+      handleCall(call);
+    });
+
+    const handleCall = (call) => {
+      call.on('stream', (remoteStream) => {
+        setCallStatus('connected');
+        remoteAudioRef.current.srcObject = remoteStream;
+        remoteAudioRef.current.play();
+      });
+      call.on('close', () => setCallStatus('ended'));
+      call.on('error', () => setCallStatus('ended'));
+    };
+
+    return () => {
+      if (localStreamRef.current) localStreamRef.current.getTracks().forEach(t => t.stop());
+      if (peerRef.current) peerRef.current.destroy();
+    };
+  }, [callId, role, showAlert]);
+
+  const endCall = () => {
+    if (peerRef.current) peerRef.current.destroy();
+    setCallStatus('ended');
+    setTimeout(() => window.location.href = '/', 1500);
+  };
+
+  const toggleMute = () => {
+    if (localStreamRef.current) {
+      const audioTrack = localStreamRef.current.getAudioTracks()[0];
+      audioTrack.enabled = !audioTrack.enabled;
+      setIsMuted(!audioTrack.enabled);
+    }
+  };
+
+  return (
+    <div className="container" style={{ paddingTop: '150px', textAlign: 'center' }}>
+      <div className="glass" style={{ padding: '60px 40px', borderRadius: '40px', maxWidth: '400px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '40px' }}>
+          <div className={`pulse-${callStatus}`} style={{
+            width: '120px', height: '120px', background: 'rgba(212,175,55,0.1)',
+            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
+            border: '2px solid var(--accent-gold)'
+          }}>
+            <User size={60} color="var(--accent-gold)" />
+          </div>
+        </div>
+
+        <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>
+          {callStatus === 'connecting' && 'Connecting...'}
+          {callStatus === 'ringing' && 'Ringing...'}
+          {callStatus === 'connected' && 'Secure Call Live'}
+          {callStatus === 'ended' && 'Call Ended'}
+        </h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>
+          {callStatus === 'connected' ? 'Enjoy your private conversation' : 'Establishing encryption bridge...'}
+        </p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '30px' }}>
+          <button
+            onClick={toggleMute}
+            style={{
+              width: '60px', height: '60px', borderRadius: '50%', background: isMuted ? '#ff4b2b' : 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
+            }}
+          >
+            {isMuted ? <Hash size={24} /> : <Hash size={24} />}
+          </button>
+
+          <button
+            onClick={endCall}
+            style={{
+              width: '70px', height: '70px', borderRadius: '50%', background: '#ff4b2b',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
+            }}
+          >
+            <X size={32} />
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        .pulse-ringing { animation: pulse 2s infinite; }
+        .pulse-connected { border-color: #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
+      `}</style>
+    </div>
+  );
+};
+const MyPropertiesView = ({ t, properties, user, setView, setSelectedProperty, setEditingProperty, handleDeleteProperty }) => {
+  const myProps = properties.filter(p => p.mobile === user?.phone || p.seller === user?.name);
+
+  return (
+    <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+      <div style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '2.5rem' }}>{t.myProperties.title}</h2>
+        <p style={{ color: 'var(--text-secondary)' }}>{t.myProperties.subtitle}</p>
+      </div>
+
+      {myProps.length === 0 ? (
+        <div className="glass" style={{ padding: '60px', textAlign: 'center', borderRadius: '30px' }}>
+          <HomeIcon size={48} color="var(--accent-gold)" style={{ opacity: 0.5, marginBottom: '20px' }} />
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>{t.myProperties.noProperties}</p>
+          <button onClick={() => setView('seller')} className="premium-button" style={{ marginTop: '30px' }}>
+            <Plus size={18} /> {t.nav.postProperty}
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {myProps.map(prop => (
+            <div
+              key={prop.id}
+              className="glass animate-fade"
+              style={{
+                borderRadius: '15px',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'row',
+                minHeight: window.innerWidth < 768 ? '120px' : '160px'
+              }}
+            >
+              <div style={{ width: '35%', minWidth: '100px', maxWidth: '250px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                <img src={prop.image || (prop.media && prop.media[0]?.url)} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
+                  <span className="badge" style={{ background: 'var(--bg-primary)', fontSize: '0.55rem', padding: '2px 6px' }}>{prop.category || 'Plot'}</span>
+                </div>
+              </div>
+              <div style={{ padding: window.innerWidth < 768 ? '12px' : '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+                <h3 style={{ fontSize: window.innerWidth < 768 ? '1rem' : '1.15rem', marginBottom: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prop.title}</h3>
+                <div style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: window.innerWidth < 768 ? '1.1rem' : '1.3rem', marginBottom: '10px' }}>
+                  ₹{prop.price?.toLocaleString()}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => {
+                      setSelectedProperty(prop);
+                      setView('detail');
+                    }}
+                    className="secondary-button"
+                    style={{ padding: '4px 10px', fontSize: '0.7rem' }}
+                  >
+                    {t.buyer.details}
+                  </button>
+                  <button
+                    onClick={() => setEditingProperty(prop)}
+                    className="secondary-button"
+                    style={{ padding: '4px 10px', fontSize: '0.7rem' }}
+                  >
+                    {t.myProperties.edit}
+                  </button>
+                  <button
+                    onClick={() => {
+                      showConfirm(t.alerts.deleteProperty, () => handleDeleteProperty(prop.id));
+                    }}
+                    className="secondary-button"
+                    style={{ padding: '4px 10px', fontSize: '0.7rem', color: '#ff4444', borderColor: 'rgba(255,68,68,0.3)' }}
+                  >
+                    {t.myProperties.delete}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const EditPropertyModal = ({ editingProperty, setEditingProperty, handleUpdateProperty, language, t }) => {
+  if (!editingProperty) return null;
+  const [price, setPrice] = useState(editingProperty.price);
+  const [location, setLocation] = useState(editingProperty.location);
+  const [title, setTitle] = useState(editingProperty.title || `${editingProperty.category} in ${editingProperty.location}`);
+  const [description, setDescription] = useState(editingProperty.description);
+  const [purpose, setPurpose] = useState(editingProperty.purpose || 'For Sale');
+  const [category, setCategory] = useState(editingProperty.category || 'Residential');
+  const [area, setArea] = useState(editingProperty.area || editingProperty.sqft || '');
+  const [beds, setBeds] = useState(editingProperty.beds || '');
+  const [baths, setBaths] = useState(editingProperty.baths || '');
+  const [floors, setFloors] = useState(editingProperty.floors || '');
+  const [ownership, setOwnership] = useState(editingProperty.ownership || 'Freehold');
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+      <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '500px', border: '1px solid var(--accent-gold)', maxHeight: '90vh', overflowY: 'auto' }}>
+        <h2 style={{ color: 'var(--accent-gold)', marginBottom: '25px', textAlign: 'center' }}>{language === 'en' ? 'Edit Property' : 'संपत्ति संपादित करें'}</h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div>
+            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Title</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+          </div>
+          <div>
+            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Price (₹)</label>
+            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+          </div>
+          <div>
+            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Location</label>
+            <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div>
+              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Purpose</label>
+              <select value={purpose} onChange={(e) => setPurpose(e.target.value)} className="premium-input" style={{ width: '100%', background: 'rgb(30, 30, 30)' }}>
+                <option>For Sale</option>
+                <option>For Rent</option>
+                <option>Lease</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="premium-input" style={{ width: '100%', background: 'rgb(30, 30, 30)' }}>
+                <option>Residential</option>
+                <option>Commercial</option>
+                <option>Industrial</option>
+                <option>Agricultural</option>
+                <option>Plot</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div>
+              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Area (Sqft/Gaj)</label>
+              <input type="number" value={area} onChange={(e) => setArea(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Ownership</label>
+              <select value={ownership} onChange={(e) => setOwnership(e.target.value)} className="premium-input" style={{ width: '100%', background: 'rgb(30,30,30)' }}>
+                <option>Freehold</option>
+                <option>Power of Attorney (POA)</option>
+                <option>Leasehold</option>
+                <option>Stamp Duty</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Floors/Details</label>
+            <input type="text" value={floors} onChange={(e) => setFloors(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+          </div>
+
+          {category === 'Residential' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div>
+                <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Beds</label>
+                <input type="number" value={beds} onChange={(e) => setBeds(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+              </div>
+              <div>
+                <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Baths</label>
+                <input type="number" value={baths} onChange={(e) => setBaths(e.target.value)} className="premium-input" style={{ width: '100%' }} />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Description</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="premium-input" style={{ width: '100%', minHeight: '80px', resize: 'vertical' }} />
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+            <button onClick={() => setEditingProperty(null)} className="secondary-button" style={{ flex: 1 }}>{t.myProperties.cancel}</button>
+            <button
+              onClick={() => handleUpdateProperty(editingProperty.id, {
+                title,
+                price: parseInt(price),
+                location,
+                description,
+                purpose,
+                category,
+                area: parseInt(area),
+                sqft: parseInt(area),
+                beds: parseInt(beds || 0),
+                baths: parseInt(baths || 0),
+                floors,
+                ownership
+              })}
+              className="premium-button"
+              style={{ flex: 1 }}
+            >
+              {t.myProperties.saveChanges}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [view, setView] = useState('landing'); // landing, buyer, seller, detail, auth
   const [properties, setProperties] = useState(INITIAL_PROPERTIES);
@@ -280,52 +1271,6 @@ function App() {
   const showAlert = (msg) => setModal({ isOpen: true, type: 'alert', message: msg, onConfirm: null });
   const showConfirm = (msg, onConfirm) => setModal({ isOpen: true, type: 'confirm', message: msg, onConfirm });
   const closeModal = () => setModal({ ...modal, isOpen: false });
-
-  // Custom Modal Component
-  const CustomModal = () => {
-    if (!modal.isOpen) return null;
-    return (
-      <div style={{
-        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-        background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backdropFilter: 'blur(5px)'
-      }}>
-        <div className="glass" style={{
-          padding: '40px', borderRadius: '20px', maxWidth: '400px', width: '90%',
-          textAlign: 'center', border: '1px solid var(--accent-gold)', boxShadow: '0 0 30px rgba(212, 175, 55, 0.2)'
-        }}>
-          <h3 style={{ color: 'var(--accent-gold)', fontSize: '1.5rem', marginBottom: '1.5rem', fontFamily: 'Playfair Display' }}>
-            {modal.type === 'confirm' ? 'Confirmation' : 'Notification'}
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
-            {modal.message}
-          </p>
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-            {modal.type === 'confirm' && (
-              <button
-                onClick={closeModal}
-                style={{
-                  padding: '12px 30px', borderRadius: '50px', background: 'transparent',
-                  border: '1px solid var(--text-secondary)', color: 'var(--text-secondary)', cursor: 'pointer'
-                }}
-              >
-                Cancel
-              </button>
-            )}
-            <button
-              onClick={() => {
-                if (modal.onConfirm) modal.onConfirm();
-                closeModal();
-              }}
-              className="premium-button"
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // Auth State - Bakenovation Restore (Robust)
   const [user, setUser] = useState(() => {
@@ -866,756 +1811,19 @@ _Verified Professional Lead_ 🟢`;
   };
 
 
-  const LandingView = ({ t, setView, setIsSearchActive }) => (
-    <React.Fragment>
-      <div className="hero-section" style={{ height: '90vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div className="hero-bg"></div>
-        <div className="container hero-content">
-          <div className="animate-fade">
-            <span className="badge">{t.hero.badge}</span>
-            <h1 style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: '1.5rem', maxWidth: '900px', lineHeight: 1.1, color: '#fff' }}>
-              {t.hero.title.includes('Masterpiece') ? (
-                <>
-                  {t.hero.title.split('Masterpiece')[0]}
-                  <span className="text-gradient-gold">Masterpiece</span>
-                  {t.hero.title.split('Masterpiece')[1]}
-                </>
-              ) : t.hero.title}
-            </h1>
-            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
-              {t.hero.subtitle}
-            </p>
-            <button onClick={() => { setView('buyer'); setIsSearchActive(true); }} className="premium-button" style={{ padding: '18px 40px', fontSize: '1.2rem', marginTop: '1rem' }}>
-              {t.hero.findHomes} <ArrowRight size={20} style={{ marginLeft: '10px' }} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </React.Fragment >
-  );
-
-  // Buyer View Component
-  const BuyerView = ({
-    t, properties, searchQuery, filterType, filterArea, filterBudget, sortBy, setSortBy, setView, setSelectedProperty, user
-  }) => {
-    const filteredProperties = properties.filter(p => {
-      const matchesSearch = searchQuery === '' ||
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesType = filterType === 'all' || p.category?.toLowerCase() === filterType.toLowerCase();
-
-      // Area filter logic
-      let matchesArea = true;
-      if (filterArea !== 'all') {
-        const area = p.sqft || p.area || 0;
-        if (filterArea === 'small') matchesArea = area < 1000;
-        else if (filterArea === 'medium') matchesArea = area >= 1000 && area <= 3000;
-        else if (filterArea === 'large') matchesArea = area > 3000 && area <= 8000;
-        else if (filterArea === 'xlarge') matchesArea = area > 8000;
-      }
-
-      // Budget filter logic
-      let matchesBudget = true;
-      if (filterBudget !== 'all') {
-        const price = p.price || 0;
-        if (filterBudget === 'budget') matchesBudget = price < 5000000;
-        else if (filterBudget === 'mid') matchesBudget = price >= 5000000 && price <= 15000000;
-        else if (filterBudget === 'premium') matchesBudget = price > 15000000 && price <= 50000000;
-        else if (filterBudget === 'luxury') matchesBudget = price > 50000000;
-      }
-
-      return matchesSearch && matchesType && matchesArea && matchesBudget;
-    }).sort((a, b) => {
-      if (sortBy === 'priceHigh') return b.price - a.price;
-      if (sortBy === 'priceLow') return a.price - b.price;
-      if (sortBy === 'old') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-    });
-
-    return (
-      <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
-          <div>
-            <h2 style={{ fontSize: '2.5rem' }}>{t.buyer.title}</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>{t.buyer.subtitle} ({filteredProperties.length})</p>
-          </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <button
-              onClick={() => setView('buyer')}
-              className="secondary-button"
-              style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              <HomeIcon size={18} /> {t.nav.marketplace || 'Marketplace'}
-            </button>
-            <select
-              className="glass"
-              style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', background: 'transparent' }}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="latest">Latest to Oldest</option>
-              <option value="old">Oldest to Latest</option>
-              <option value="priceHigh">Price: High to Low</option>
-              <option value="priceLow">Price: Low to High</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="property-grid">
-          {filteredProperties.map((p, index) => (
-            <div
-              key={p.id}
-              className="property-card glass animate-fade"
-              style={{ animationDelay: `${index * 0.1}s`, cursor: 'pointer' }}
-              onClick={() => {
-                if (user) {
-                  setSelectedProperty(p);
-                  setView('detail');
-                } else {
-                  setView('auth');
-                }
-              }}
-            >
-              <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
-                <img
-                  src={p.image}
-                  alt={p.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <div style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--accent-gold)', color: '#000', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                  {p.category}
-                </div>
-              </div>
-              <div style={{ padding: '25px' }}>
-                <div style={{ color: 'var(--accent-gold)', fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '10px' }}>
-                  ₹{p.price.toLocaleString('en-IN')}
-                </div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{p.title}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
-                  <MapPin size={14} /> {p.location}
-                </div>
-                <div style={{ display: 'flex', gap: '15px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-color)', paddingTop: '15px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Bed size={16} /> {p.beds}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Bath size={16} /> {p.baths}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Maximize size={16} /> {p.sqft || p.area} sqft</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
 
-  const PropertyDetailView = () => {
-    const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
-
-    // Normalize media for display (handle legacy properties)
-    const mediaList = selectedProperty.media || [{ type: 'image', url: selectedProperty.image }];
-    const currentMedia = mediaList[selectedMediaIndex] || mediaList[0];
-
-    return (
-      <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-        <button onClick={() => setView('buyer')} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-          <X size={18} /> {t.detail.back}
-        </button>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '40px', alignItems: 'start' }}>
-          {/* Left Side: Media & Description */}
-          <div>
-            <div style={{ borderRadius: '30px', overflow: 'hidden', background: '#000', height: '500px', marginBottom: '20px', position: 'relative', border: '1px solid var(--glass-border)' }}>
-              {currentMedia.type === 'video' ? (
-                <video src={currentMedia.url} controls autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              ) : (
-                <img src={currentMedia.url} alt="property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              )}
-            </div>
-
-            {mediaList.length > 1 && (
-              <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '30px', paddingBottom: '10px' }}>
-                {mediaList.map((m, i) => (
-                  <div
-                    key={i}
-                    onClick={() => setSelectedMediaIndex(i)}
-                    style={{
-                      flex: '0 0 80px', height: '80px', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer',
-                      border: selectedMediaIndex === i ? '2px solid var(--accent-gold)' : '2px solid transparent',
-                      opacity: selectedMediaIndex === i ? 1 : 0.6
-                    }}
-                  >
-                    {m.type === 'video' ? (
-                      <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Play size={20} color="#fff" /></div>
-                    ) : (
-                      <img src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="glass" style={{ padding: '30px', borderRadius: '30px' }}>
-              <h2 style={{ fontSize: '2rem', marginBottom: '20px', fontFamily: 'Playfair Display' }}>{selectedProperty.title}</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', marginBottom: '30px' }}>
-                <MapPin size={18} color="var(--accent-gold)" /> {selectedProperty.location}
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '40px', padding: '20px 0', borderTop: '1px solid var(--glass-border)', borderBottom: '1px solid var(--glass-border)' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Beds</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <Bed size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.beds}</span>
-                  </div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Baths</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <Bath size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.baths}</span>
-                  </div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Area</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <Maximize size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.area}</span>
-                  </div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Floors</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <HomeIcon size={18} color="var(--accent-gold)" /> <span style={{ fontWeight: '600' }}>{selectedProperty.floors || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <h4 style={{ color: 'var(--accent-gold)', marginBottom: '15px' }}>Description</h4>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
-                {selectedProperty.description}
-              </p>
-            </div>
-          </div>
-
-          {/* Right Side: Price & Chat (Sticky) */}
-          <div className="glass" style={{ padding: '30px', borderRadius: '30px', position: 'sticky', top: '120px', border: '1px solid var(--accent-gold)' }}>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '5px' }}>Listing Price</p>
-            <h2 style={{ fontSize: '3rem', color: 'var(--accent-gold)', marginBottom: '2rem', fontFamily: 'Playfair Display' }}>₹{selectedProperty.price.toLocaleString()}</h2>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '2rem', padding: '15px', background: 'rgba(255,255,215,0.05)', borderRadius: '15px', border: '1px solid rgba(212,175,55,0.2)' }}>
-              <div style={{ width: '50px', height: '50px', background: 'var(--accent-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 700, color: 'var(--bg-primary)' }}>
-                {selectedProperty.seller.charAt(0)}
-              </div>
-              <div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status: Verified</p>
-                <h4 style={{ fontSize: '1.1rem' }}>{selectedProperty.seller}</h4>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                if (user) {
-                  setIsChatOpen(true);
-                } else {
-                  setView('auth');
-                }
-              }}
-              className="premium-button"
-              style={{ width: '100%', justifyContent: 'center', marginBottom: '15px', padding: '15px' }}
-            >
-              {!user && <span style={{ marginRight: '8px' }}>🔒</span>}
-              <MessageSquare size={18} /> Chat on WhatsApp
-            </button>
-
-            <button
-              onClick={() => {
-                if (user) {
-                  window.location.href = `tel:${selectedProperty.phone}`;
-                } else {
-                  setView('auth');
-                }
-              }}
-              className="secondary-button"
-              style={{ width: '100%', justifyContent: 'center', padding: '15px' }}
-            >
-              {!user && <span style={{ marginRight: '8px' }}>🔒</span>}
-              <Phone size={18} /> Call Seller
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Reusing ChatOverlay name to avoid changing all calls, but implementing as Contact Modal
-  const ChatOverlay = () => (
-    <div className="glass" style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '90%',
-      maxWidth: '430px',
-      borderRadius: '30px',
-      zIndex: 1001,
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      boxShadow: '0 20px 80px rgba(0,0,0,0.8)',
-      background: 'rgba(10, 10, 10, 0.98)',
-      border: '1px solid var(--accent-gold)',
-      backdropFilter: 'blur(20px)'
-    }}>
-      <div style={{ padding: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(212,175,55,0.2)' }}>
-        <h3 style={{ margin: 0, fontFamily: 'Playfair Display', color: 'var(--accent-gold)' }}>Connect Privately</h3>
-        <button onClick={() => setIsChatOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
-          <X size={24} />
-        </button>
-      </div>
-
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 25px' }}>
-          <div style={{
-            width: '100%', height: '100%',
-            background: 'linear-gradient(135deg, var(--accent-gold), #b38b2d)',
-            borderRadius: '25px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2.2rem', fontWeight: 800,
-            color: 'var(--bg-primary)',
-            boxShadow: '0 10px 20px rgba(212,175,55,0.3)'
-          }}>
-            {selectedProperty.seller.charAt(0)}
-          </div>
-          <div style={{
-            position: 'absolute', bottom: '-5px', right: '-5px',
-            background: '#25D366', width: '28px', height: '28px',
-            borderRadius: '50%', border: '4px solid #000',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Check size={14} color="white" strokeWidth={3} />
-          </div>
-        </div>
-
-        <h2 style={{ marginBottom: '8px', fontSize: '1.8rem' }}>{selectedProperty.seller}</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '35px' }}>
-          {language === 'en' ? 'Verified Professional' : 'सत्यापित पेशेवर'}
-        </p>
-
-        <div style={{
-          background: 'rgba(212,175,55,0.05)',
-          padding: '20px',
-          borderRadius: '20px',
-          marginBottom: '30px',
-          border: '1px dashed rgba(212,175,55,0.3)',
-          textAlign: 'left'
-        }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Privacy Shield Active 🛡️</p>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-            {language === 'en'
-              ? "Your phone number is hidden. You will chat via the central Tha Bot number to protect your privacy."
-              : "आपका फ़ोन नंबर छिपा हुआ है। आपकी गोपनीयता बनाए रखने के लिए आप केंद्रीय 'Tha Bot' नंबर द्वारा चैट करेंगे।"}
-          </p>
-        </div>
-
-        <button
-          onClick={() => {
-            const botNumber = "919186090113";
-            const msg = `Hi Tha, I'm interested in viewing Property #${selectedProperty.id}: ${selectedProperty.title} (${selectedProperty.location}). Can you help me connect?`;
-            window.open(`https://wa.me/${botNumber}?text=${encodeURIComponent(msg)}`, '_blank');
-          }}
-          className="premium-button"
-          style={{ width: '100%', justifyContent: 'center', background: '#25D366', color: '#fff', border: 'none', padding: '18px', fontSize: '1.1rem' }}
-        >
-          <MessageSquare size={22} style={{ marginRight: '10px' }} />
-          {language === 'en' ? 'Chat via Tha Bot' : 'Tha Bot द्वारा चैट करें'}
-        </button>
-
-        <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          Both parties chat via <b>+91 9186090113</b>
-        </p>
-
-        <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-          <button
-            onClick={async () => {
-              if (!user) {
-                showAlert("Please login to use secure calling.");
-                return;
-              }
-              try {
-                const res = await fetch('/initiate-call', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    buyerPhone: user.phone,
-                    sellerPhone: selectedProperty.mobile,
-                    propertyId: selectedProperty.id,
-                    propertyTitle: selectedProperty.title
-                  })
-                });
-                const data = await res.json();
-                if (data.success) {
-                  window.location.href = `/?view=call&id=${data.callId}&role=initiator`;
-                } else {
-                  showAlert(data.error || "Call rejected by server.");
-                }
-              } catch (e) {
-                showAlert("Network Error: Could not connect to call server.");
-              }
-            }}
-            className="premium-button"
-            style={{
-              width: '100%',
-              justifyContent: 'center',
-              background: 'rgba(212,175,55,0.1)',
-              border: '2px solid var(--accent-gold)',
-              color: 'var(--accent-gold)',
-              padding: '18px',
-              fontSize: '1.1rem',
-              fontWeight: 'bold',
-              boxShadow: '0 0 15px rgba(212,175,55,0.2)'
-            }}
-          >
-            <Phone size={22} style={{ marginRight: '10px' }} />
-            {language === 'en' ? 'Secure Voice Call' : 'सुरक्षित वॉयस कॉल'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const CallInterface = () => {
-    const [callStatus, setCallStatus] = useState('connecting'); // connecting, ringing, connected, ended
-    const [isMuted, setIsMuted] = useState(false);
-    const peerRef = useRef(null);
-    const remoteAudioRef = useRef(new Audio());
-    const localStreamRef = useRef(null);
-    const urlParams = new URLSearchParams(window.location.search);
-    const callId = urlParams.get('id');
-    const role = urlParams.get('role');
-
-    useEffect(() => {
-      if (!callId) return;
-
-      const peer = new Peer(role === 'initiator' ? `${callId}-buyer` : `${callId}-seller`, {
-        debug: 2
-      });
-      peerRef.current = peer;
-
-      peer.on('open', async (id) => {
-        console.log('✅ Peer ID:', id);
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          localStreamRef.current = stream;
-
-          if (role === 'initiator') {
-            setCallStatus('ringing');
-            // Initiator waits a bit for the seller to answer the WhatsApp message
-            setTimeout(() => {
-              const call = peer.call(`${callId}-seller`, stream);
-              handleCall(call);
-            }, 5000);
-          }
-        } catch (err) {
-          showAlert("Microphone access denied. Please enable it to call.");
-          setCallStatus('ended');
-        }
-      });
-
-      peer.on('call', (call) => {
-        setCallStatus('connected');
-        call.answer(localStreamRef.current);
-        handleCall(call);
-      });
-
-      const handleCall = (call) => {
-        call.on('stream', (remoteStream) => {
-          setCallStatus('connected');
-          remoteAudioRef.current.srcObject = remoteStream;
-          remoteAudioRef.current.play();
-        });
-        call.on('close', () => setCallStatus('ended'));
-        call.on('error', () => setCallStatus('ended'));
-      };
-
-      return () => {
-        if (localStreamRef.current) localStreamRef.current.getTracks().forEach(t => t.stop());
-        if (peerRef.current) peerRef.current.destroy();
-      };
-    }, [callId, role]);
-
-    const endCall = () => {
-      if (peerRef.current) peerRef.current.destroy();
-      setCallStatus('ended');
-      setTimeout(() => window.location.href = '/', 1500);
-    };
-
-    const toggleMute = () => {
-      if (localStreamRef.current) {
-        const audioTrack = localStreamRef.current.getAudioTracks()[0];
-        audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
-      }
-    };
-
-    return (
-      <div className="container" style={{ paddingTop: '150px', textAlign: 'center' }}>
-        <div className="glass" style={{ padding: '60px 40px', borderRadius: '40px', maxWidth: '400px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '40px' }}>
-            <div className={`pulse-${callStatus}`} style={{
-              width: '120px', height: '120px', background: 'rgba(212,175,55,0.1)',
-              borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
-              border: '2px solid var(--accent-gold)'
-            }}>
-              <User size={60} color="var(--accent-gold)" />
-            </div>
-          </div>
-
-          <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>
-            {callStatus === 'connecting' && 'Connecting...'}
-            {callStatus === 'ringing' && 'Ringing...'}
-            {callStatus === 'connected' && 'Secure Call Live'}
-            {callStatus === 'ended' && 'Call Ended'}
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>
-            {callStatus === 'connected' ? 'Enjoy your private conversation' : 'Establishing encryption bridge...'}
-          </p>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '30px' }}>
-            <button
-              onClick={toggleMute}
-              style={{
-                width: '60px', height: '60px', borderRadius: '50%', background: isMuted ? '#ff4b2b' : 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
-              }}
-            >
-              {isMuted ? <Sparkles size={24} /> : <Hash size={24} />}
-            </button>
-
-            <button
-              onClick={endCall}
-              style={{
-                width: '70px', height: '70px', borderRadius: '50%', background: '#ff4b2b',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
-              }}
-            >
-              <X size={32} />
-            </button>
-          </div>
-        </div>
-
-        <style>{`
-          .pulse-ringing { animation: pulse 2s infinite; }
-          .pulse-connected { border-color: #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
-          @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
-        `}</style>
-      </div>
-    );
-  };
-
-  const MyPropertiesView = () => {
-    const myProps = properties.filter(p => p.mobile === user?.phone);
-
-    return (
-      <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
-        <div style={{ marginBottom: '3rem' }}>
-          <h2 style={{ fontSize: '2.5rem' }}>{t.myProperties.title}</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>{t.myProperties.subtitle}</p>
-        </div>
-
-        {myProps.length === 0 ? (
-          <div className="glass" style={{ padding: '60px', textAlign: 'center', borderRadius: '30px' }}>
-            <HomeIcon size={48} color="var(--accent-gold)" style={{ opacity: 0.5, marginBottom: '20px' }} />
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>{t.myProperties.noProperties}</p>
-            <button onClick={() => setView('seller')} className="premium-button" style={{ marginTop: '30px' }}>
-              <Plus size={18} /> {t.nav.postProperty}
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {myProps.map(prop => (
-              <div
-                key={prop.id}
-                className="glass animate-fade"
-                style={{
-                  borderRadius: '15px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  minHeight: window.innerWidth < 768 ? '120px' : '160px'
-                }}
-              >
-                <div style={{ width: '35%', minWidth: '100px', maxWidth: '250px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                  <img src={prop.image || (prop.media && prop.media[0]?.url)} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
-                    <span className="badge" style={{ background: 'var(--bg-primary)', fontSize: '0.55rem', padding: '2px 6px' }}>{prop.category || 'Plot'}</span>
-                  </div>
-                </div>
-                <div style={{ padding: window.innerWidth < 768 ? '12px' : '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
-                  <h3 style={{ fontSize: window.innerWidth < 768 ? '1rem' : '1.15rem', marginBottom: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prop.title}</h3>
-                  <div style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: window.innerWidth < 768 ? '1.1rem' : '1.3rem', marginBottom: '10px' }}>
-                    ₹{prop.price?.toLocaleString()}
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => {
-                        setSelectedProperty(prop);
-                        setView('detail');
-                      }}
-                      className="secondary-button"
-                      style={{ padding: '4px 10px', fontSize: '0.7rem' }}
-                    >
-                      {t.buyer.details}
-                    </button>
-                    <button
-                      onClick={() => setEditingProperty(prop)}
-                      className="secondary-button"
-                      style={{ padding: '4px 10px', fontSize: '0.7rem' }}
-                    >
-                      {t.myProperties.edit}
-                    </button>
-                    <button
-                      onClick={() => {
-                        showConfirm(t.alerts.deleteProperty, () => handleDeleteProperty(prop.id));
-                      }}
-                      className="secondary-button"
-                      style={{ padding: '4px 10px', fontSize: '0.7rem', color: '#ff4444', borderColor: 'rgba(255,68,68,0.3)' }}
-                    >
-                      {t.myProperties.delete}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const EditPropertyModal = () => {
-    if (!editingProperty) return null;
-    const [price, setPrice] = useState(editingProperty.price);
-    const [location, setLocation] = useState(editingProperty.location);
-    const [title, setTitle] = useState(editingProperty.title || `${editingProperty.category} in ${editingProperty.location}`);
-    const [description, setDescription] = useState(editingProperty.description);
-    const [purpose, setPurpose] = useState(editingProperty.purpose || 'For Sale');
-    const [category, setCategory] = useState(editingProperty.category || 'Residential');
-    const [area, setArea] = useState(editingProperty.area || editingProperty.sqft || '');
-    const [beds, setBeds] = useState(editingProperty.beds || '');
-    const [baths, setBaths] = useState(editingProperty.baths || '');
-    const [floors, setFloors] = useState(editingProperty.floors || '');
-    const [ownership, setOwnership] = useState(editingProperty.ownership || 'Freehold');
-
-    return (
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-        <div className="glass" style={{ padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '500px', border: '1px solid var(--accent-gold)' }}>
-          <h2 style={{ color: 'var(--accent-gold)', marginBottom: '25px', textAlign: 'center' }}>{language === 'en' ? 'Edit Property' : 'संपत्ति संपादित करें'}</h2>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Title</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-            </div>
-            <div>
-              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Price (₹)</label>
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-            </div>
-            <div>
-              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Location</label>
-              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div>
-                <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Purpose</label>
-                <select value={purpose} onChange={(e) => setPurpose(e.target.value)} className="premium-input" style={{ width: '100%', background: 'rgb(30, 30, 30)' }}>
-                  <option>For Sale</option>
-                  <option>For Rent</option>
-                  <option>Lease</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Category</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="premium-input" style={{ width: '100%', background: 'rgb(30, 30, 30)' }}>
-                  <option>Residential</option>
-                  <option>Commercial</option>
-                  <option>Industrial</option>
-                  <option>Agricultural</option>
-                  <option>Plot</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <div>
-                <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Area (Sqft/Gaj)</label>
-                <input type="number" value={area} onChange={(e) => setArea(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-              </div>
-              <div>
-                <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Ownership</label>
-                <select value={ownership} onChange={(e) => setOwnership(e.target.value)} className="premium-input" style={{ width: '100%', background: 'rgb(30,30,30)' }}>
-                  <option>Freehold</option>
-                  <option>Power of Attorney (POA)</option>
-                  <option>Leasehold</option>
-                  <option>Stamp Duty</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Floors/Details</label>
-              <input type="text" value={floors} onChange={(e) => setFloors(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-            </div>
-
-            {category === 'Residential' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div>
-                  <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Beds</label>
-                  <input type="number" value={beds} onChange={(e) => setBeds(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-                </div>
-                <div>
-                  <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Baths</label>
-                  <input type="number" value={baths} onChange={(e) => setBaths(e.target.value)} className="premium-input" style={{ width: '100%' }} />
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label style={{ color: 'var(--accent-gold)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Description</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="premium-input" style={{ width: '100%', minHeight: '80px', resize: 'vertical' }} />
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button onClick={() => setEditingProperty(null)} className="secondary-button" style={{ flex: 1 }}>{t.myProperties.cancel}</button>
-              <button
-                onClick={() => handleUpdateProperty(editingProperty.id, {
-                  title,
-                  price: parseInt(price),
-                  location,
-                  description,
-                  purpose,
-                  category,
-                  area: parseInt(area),
-                  sqft: parseInt(area),
-                  beds: parseInt(beds || 0),
-                  baths: parseInt(baths || 0),
-                  floors,
-                  ownership
-                })}
-                className="premium-button"
-                style={{ flex: 1 }}
-              >
-                {t.myProperties.saveChanges}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="App">
-      <CustomModal />
-      <EditPropertyModal />
+      <CustomModal modal={modal} closeModal={closeModal} />
+      <EditPropertyModal
+        editingProperty={editingProperty}
+        setEditingProperty={setEditingProperty}
+        handleUpdateProperty={handleUpdateProperty}
+        language={language}
+        t={t}
+      />
       <Nav
         t={t}
         view={view}
@@ -1643,6 +1851,16 @@ _Verified Professional Lead_ 🟢`;
         showConfirm={showConfirm}
       />
 
+      {isChatOpen && (
+        <ChatOverlay
+          setIsChatOpen={setIsChatOpen}
+          selectedProperty={selectedProperty}
+          language={language}
+          user={user}
+          showAlert={showAlert}
+        />
+      )}
+
       {view === 'landing' && <LandingView t={t} setView={setView} setIsSearchActive={setIsSearchActive} />}
       {view === 'buyer' && (
         <BuyerView
@@ -1656,6 +1874,7 @@ _Verified Professional Lead_ 🟢`;
           setSortBy={setSortBy}
           setView={setView}
           setSelectedProperty={setSelectedProperty}
+          user={user}
         />
       )}
       {view === 'builders' && (
@@ -1670,12 +1889,31 @@ _Verified Professional Lead_ 🟢`;
           setSortBy={setSortBy}
           setView={setView}
           setSelectedProperty={setSelectedProperty}
+          user={user}
         />
-      )} {/* Reusing buyer view for matching feed */}
+      )}
       {view === 'seller' && <PostPropertyView t={t} setView={setView} user={user} handlePostProfessional={handlePostProfessional} />}
-      {view === 'detail' && selectedProperty && <PropertyDetailView />}
-      {view === 'call' && <CallInterface />}
-      {view === 'my-properties' && <MyPropertiesView />}
+      {view === 'detail' && selectedProperty && (
+        <PropertyDetailView
+          t={t}
+          setView={setView}
+          selectedProperty={selectedProperty}
+          user={user}
+          setIsChatOpen={setIsChatOpen}
+        />
+      )}
+      {view === 'call' && <CallInterface showAlert={showAlert} />}
+      {view === 'my-properties' && (
+        <MyPropertiesView
+          t={t}
+          properties={properties}
+          user={user}
+          setView={setView}
+          setSelectedProperty={setSelectedProperty}
+          setEditingProperty={setEditingProperty}
+          handleDeleteProperty={handleDeleteProperty}
+        />
+      )}
 
       {view === 'auth' && (
         <div className="container" style={{ paddingTop: '150px', display: 'flex', justifyContent: 'center' }}>
