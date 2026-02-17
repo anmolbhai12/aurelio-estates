@@ -27,6 +27,7 @@ import {
 import { translations } from './translations';
 import { gsap } from 'gsap';
 import FoxBot from './FoxBot.jsx';
+import StickySearch from './StickySearch.jsx';
 import Peer from 'peerjs';
 
 // Mock Data
@@ -39,7 +40,7 @@ const Nav = ({
   filterArea, setFilterArea, filterBudget, setFilterBudget,
   user, setUser, showProfileMenu, setShowProfileMenu,
   language, setLanguage, isChoosingLanguage, setIsChoosingLanguage,
-  setIsEditingName, setTempName, showConfirm
+  setIsEditingName, setTempName, showConfirm, setIsStickySearchOpen
 }) => (
   <nav className="glass" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, padding: '1rem 0' }}>
     <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -55,7 +56,14 @@ const Nav = ({
             type="text"
             placeholder={t.buyer.searchPlaceholder || 'Search properties...'}
             value={searchQuery}
-            onFocus={() => setIsSearchActive(true)}
+            onFocus={(e) => {
+              if (window.innerWidth < 768) {
+                e.target.blur();
+                setIsStickySearchOpen(true);
+              } else {
+                setIsSearchActive(true);
+              }
+            }}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               if (e.target.value && view !== 'buyer') {
@@ -1417,6 +1425,7 @@ function App() {
   const [filterBudget, setFilterBudget] = useState('all');
   const [filterListing, setFilterListing] = useState('all');
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isStickySearchOpen, setIsStickySearchOpen] = useState(false);
 
   const t = translations[language];
 
@@ -1979,7 +1988,21 @@ _Verified Professional Lead_ 🟢`;
         language={language}
         t={t}
       />
+      <StickySearch
+        isExpanded={isStickySearchOpen}
+        onClose={() => setIsStickySearchOpen(false)}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filterType={filterType}
+        setFilterType={setFilterType}
+        filterArea={filterArea}
+        setFilterArea={setFilterArea}
+        filterBudget={filterBudget}
+        setFilterBudget={setFilterBudget}
+        t={t}
+      />
       <Nav
+        setIsStickySearchOpen={setIsStickySearchOpen}
         t={t}
         view={view}
         setView={setView}
