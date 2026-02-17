@@ -344,7 +344,7 @@ const LandingView = ({ t, setView, setIsSearchActive }) => (
           <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem' }}>
             {t.hero.subtitle}
           </p>
-          <button onClick={() => setView('buyer')} className="premium-button" style={{ padding: '18px 40px', fontSize: '1.2rem', marginTop: '1rem' }}>
+          <button onClick={() => { setView('buyer'); setIsSearchActive(false); }} className="premium-button" style={{ padding: '18px 40px', fontSize: '1.2rem', marginTop: '1rem' }}>
             {t.hero.findHomes} <ArrowRight size={20} style={{ marginLeft: '10px' }} />
           </button>
         </div>
