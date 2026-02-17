@@ -475,13 +475,6 @@ const BuyerView = ({
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button
-            onClick={() => setView('buyer')}
-            className="secondary-button"
-            style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <HomeIcon size={18} /> {t.nav.marketplace || 'Marketplace'}
-          </button>
           <select
             className="glass"
             style={{ padding: '10px 20px', borderRadius: '30px', color: 'white', border: '1px solid var(--accent-gold)', background: 'transparent' }}
