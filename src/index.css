@@ -78,6 +78,18 @@ textarea:focus {
 }
 
 /* Global Utilities */
+
+/* Gold gradient text - used on hero "Masterpiece" word */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #f5d98b 0%, #c5a059 40%, #e8c97a 70%, #a68546 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline;
+  font-style: italic;
+  position: relative;
+}
+
 .container {
   max-width: 1400px;
   margin: 0 auto;
